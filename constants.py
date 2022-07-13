@@ -7,9 +7,9 @@ UNK = '$UNK$'
 
 parser = argparse.ArgumentParser(description='Multi-region size CNN for re')
 parser.add_argument('-i', help='Job identity', type=int, default=0)
-parser.add_argument('-rb', help='Rebuild data', type=int, default=0)
-parser.add_argument('-e', help='Number of epochs', type=int, default=8)
-parser.add_argument('-p', help='Patience of early stop (0 for ignore early stop)', type=int, default=3)
+parser.add_argument('-rb', help='Rebuild data', type=int, default=1)
+parser.add_argument('-e', help='Number of epochs', type=int, default=80)
+parser.add_argument('-p', help='Patience of early stop (0 for ignore early stop)', type=int, default=10)
 
 parser.add_argument('-config', help='CNN configurations default \'1:128\'', type=str, default='2:32,3:96,4:32,5:64')
 parser.add_argument('-len', help='Max sentence or document length', type=int, default=64)
@@ -60,6 +60,15 @@ ALL_DEPENDS = DATA + 'all_depend.txt'
 
 encoder = TFBertModel.from_pretrained("dmis-lab/biobert-v1.1", from_pt=True)
 tokenizer = BertTokenizer.from_pretrained("dmis-lab/biobert-v1.1")
+
+ADDITIONAL_SPECIAL_TOKENS = ["<e1>", "</e1>", "<e2>", "</e2>"]
+
+tokenizer.add_special_tokens({"additional_special_tokens": ADDITIONAL_SPECIAL_TOKENS})
+
+START_E1 = tokenizer.encode('<e1>')[1]
+END_E1 = tokenizer.encode('</e1>')[1]
+START_E2 = tokenizer.encode('<e2>')[1]
+END_E2 = tokenizer.encode('</e2>')[1]
 
 TRAINED_MODELS = DATA + 'trained_models/'
 MODEL_NAMES = TRAINED_MODELS + '{}_{}'

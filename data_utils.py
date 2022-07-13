@@ -178,3 +178,10 @@ def make_dataset(values, labels, seq_len, batch_size):
     return ds
 
 
+def mat_mul(hidden_output, e_mask):
+    e_mask = tf.expand_dims(e_mask, 1)
+    e_mask = tf.cast(e_mask, tf.float32)
+    prod = e_mask @ hidden_output
+    prod = tf.squeeze(prod, axis=1)
+    return prod
+
