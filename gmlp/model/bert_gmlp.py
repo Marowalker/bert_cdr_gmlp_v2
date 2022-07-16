@@ -41,14 +41,14 @@ class BertgMLPModel:
         self.trained_models = constants.TRAINED_MODELS
 
     def _add_inputs(self):
-        self.input_ids = tf.keras.layers.Input(shape=(self.max_length, ), dtype='int32')
-        self.head_mask = tf.keras.layers.Input(shape=(self.max_length, ), dtype='float32')
-        self.e1_mask = tf.keras.layers.Input(shape=(self.max_length, ), dtype='float32')
-        self.e2_mask = tf.keras.layers.Input(shape=(self.max_length, ), dtype='float32')
-        self.pos_ids = tf.keras.layers.Input(shape=(self.max_length, ), dtype='int32')
-        self.synset_ids = tf.keras.layers.Input(shape=(self.max_length, ), dtype='int32')
-        self.relation_ids = tf.keras.layers.Input(shape=(self.max_length, ), dtype='int32')
-        self.triple_ids = tf.keras.layers.Input(shape=(2, ), dtype='int32')
+        self.input_ids = tf.keras.layers.Input(shape=(self.max_length,), dtype='int32')
+        self.head_mask = tf.keras.layers.Input(shape=(self.max_length,), dtype='float32')
+        self.e1_mask = tf.keras.layers.Input(shape=(self.max_length,), dtype='float32')
+        self.e2_mask = tf.keras.layers.Input(shape=(self.max_length,), dtype='float32')
+        self.pos_ids = tf.keras.layers.Input(shape=(self.max_length,), dtype='int32')
+        self.synset_ids = tf.keras.layers.Input(shape=(self.max_length,), dtype='int32')
+        self.relation_ids = tf.keras.layers.Input(shape=(self.max_length,), dtype='int32')
+        self.triple_ids = tf.keras.layers.Input(shape=(2,), dtype='int32')
 
     def _bert_layer(self):
         self.bertoutput = self.encoder(self.input_ids)
@@ -111,20 +111,22 @@ class BertgMLPModel:
             outputs=self._bert_layer())
         self.optimizer = tf.keras.optimizers.Adam(lr=2e-5)
 
-        self.model.compile(optimizer=self.optimizer, loss='binary_crossentropy', metrics=['accuracy',
-                                                                                          F1Score(num_classes=2,
-                                                                                                  average="macro",
-                                                                                                  threshold=0.9)])
+        self.model.compile(optimizer=self.optimizer, loss='categorical_crossentropy', metrics=['accuracy',
+                                                                                               F1Score(num_classes=2,
+                                                                                                       average="macro",
+                                                                                                       threshold=0.9)])
         print(self.model.summary())
 
     def _train(self, train_data, val_data):
 
-        early_stopping = tf.keras.callbacks.EarlyStopping(monitor='val_f1_score', patience=constants.PATIENCE)
+        early_stopping = tf.keras.callbacks.EarlyStopping(monitor='val_f1_score', mode='max',
+                                                          patience=constants.PATIENCE)
 
         model_checkpoint_callback = tf.keras.callbacks.ModelCheckpoint(
             filepath=TRAINED_MODELS,
             save_weights_only=True,
             monitor='val_f1_score',
+            mode='max',
             save_best_only=True)
 
         self.model.fit(x=(train_data.words, train_data.head_mask, train_data.e1_mask, train_data.e2_mask,
