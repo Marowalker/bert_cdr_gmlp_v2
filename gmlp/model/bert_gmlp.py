@@ -109,12 +109,12 @@ class BertgMLPModel:
             inputs=[self.input_ids, self.head_mask, self.e1_mask, self.e2_mask, self.pos_ids, self.synset_ids,
                     self.triple_ids],
             outputs=self._bert_layer())
-        self.optimizer = tf.keras.optimizers.Adam(lr=2e-5)
+        self.optimizer = tf.keras.optimizers.Adam(lr=1e-6)
 
         self.model.compile(optimizer=self.optimizer, loss='categorical_crossentropy', metrics=['accuracy',
                                                                                                F1Score(num_classes=2,
                                                                                                        average="macro",
-                                                                                                       threshold=0.9)])
+                                                                                                       threshold=0.5)])
         print(self.model.summary())
 
     def _train(self, train_data, val_data):
