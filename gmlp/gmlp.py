@@ -16,7 +16,7 @@ class gMLP(Model):
                  ff_mult=4,
                  causal=False,
                  activation=None,
-                 dropout_ratio=0.2,
+                 dropout_ratio=0.05,
                  **kwargs):
 
         reg_keys = ['bias_regularizer', 'kernel_regularizer']

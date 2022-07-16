@@ -30,7 +30,7 @@ test = Dataset(constants.RAW_DATA + 'sdp_data_acentors_bert.test.txt', vocab_pos
 validation = Dataset('', '', process_data=False)
 train_ratio = 0.85
 n_sample = int(len(dev.words) * (2 * train_ratio - 1))
-props = ['words', 'head_mask', 'e1_mask', 'e2_mask', 'labels', 'poses', 'synsets', 'relations', 'identities', 'triples']
+props = ['words', 'head_mask', 'e1_mask', 'e2_mask', 'labels', 'poses', 'synsets', 'identities', 'triples']
 
 for prop in props:
     train.__dict__[prop].extend(dev.__dict__[prop][:n_sample])
@@ -39,7 +39,7 @@ for prop in props:
 train.get_padded_data()
 validation.get_padded_data()
 
-print(train.e2_mask)
+print(train.words)
 
 # wn_emb = get_trimmed_w2v_vectors('data/w2v_model/wordnet_embeddings.npz')
 #

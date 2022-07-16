@@ -1,5 +1,5 @@
 import tensorflow as tf
-
+from tensorflow_addons.metrics import F1Score
 import constants
 from constants import *
 import numpy as np
@@ -37,7 +37,6 @@ class BertgMLPModel:
         self.max_length = constants.MAX_LENGTH
         self.num_of_pos = countNumPos()
         self.num_of_synset = countNumSynset()
-        self.num_of_depend = countNumRelation()
         self.num_of_class = len(constants.ALL_LABELS)
         self.trained_models = constants.TRAINED_MODELS
 
@@ -57,8 +56,6 @@ class BertgMLPModel:
 
         pos_emb = tf.keras.layers.Embedding(self.num_of_pos + 1, 6)(self.pos_ids)
 
-        relation_emb = tf.keras.layers.Embedding(self.num_of_depend + 1, 8)(self.relation_ids)
-
         synset_emb = tf.keras.layers.Embedding(self.wordnet_emb.shape[0], 18, weights=[self.wordnet_emb],
                                                trainable=False)(self.synset_ids)
 
@@ -69,7 +66,6 @@ class BertgMLPModel:
                       activation=tf.nn.swish)(emb)
         pos_x = gMLP(dim=6, depth=self.depth, seq_len=self.max_length, activation=tf.nn.swish)(pos_emb)
         synset_x = gMLP(dim=18, depth=self.depth, seq_len=self.max_length, activation=tf.nn.swish)(synset_emb)
-        relation_x = gMLP(dim=8, depth=self.depth, seq_len=self.max_length, activation=tf.nn.swish)(relation_emb)
         triple_x = gMLP(dim=constants.TRIPLE_W2V_DIM, depth=self.depth, seq_len=2, activation=tf.nn.swish)(triple_emb)
 
         head_x = mat_mul(word_x, self.head_mask)
@@ -96,11 +92,7 @@ class BertgMLPModel:
         triple_x = tf.keras.layers.LayerNormalization()(triple_x)
         triple_x = tf.keras.layers.Dense(constants.TRIPLE_W2V_DIM)(triple_x)
 
-        relation_x = tf.keras.layers.Flatten(data_format="channels_first")(relation_x)
-        relation_x = tf.keras.layers.LayerNormalization()(relation_x)
-        relation_x = tf.keras.layers.Dense(8)(relation_x)
-
-        x = tf.keras.layers.concatenate([head_x, e1_x, e2_x, pos_x, synset_x, relation_x, triple_x])
+        x = tf.keras.layers.concatenate([head_x, e1_x, e2_x, pos_x, synset_x, triple_x])
 
         out = tf.keras.layers.Dropout(DROPOUT)(x)
         out = tf.keras.layers.Dense(128)(out)
@@ -115,11 +107,14 @@ class BertgMLPModel:
     def _add_train_ops(self):
         self.model = tf.keras.Model(
             inputs=[self.input_ids, self.head_mask, self.e1_mask, self.e2_mask, self.pos_ids, self.synset_ids,
-                    self.relation_ids, self.triple_ids],
+                    self.triple_ids],
             outputs=self._bert_layer())
-        self.optimizer = tf.keras.optimizers.Adam(lr=1e-4)
+        self.optimizer = tf.keras.optimizers.Adam(lr=2e-5)
 
-        self.model.compile(optimizer=self.optimizer, loss='binary_crossentropy', metrics=['accuracy', self.f1_score])
+        self.model.compile(optimizer=self.optimizer, loss='binary_crossentropy', metrics=['accuracy',
+                                                                                          F1Score(num_classes=2,
+                                                                                                  average="macro",
+                                                                                                  threshold=0.9)])
         print(self.model.summary())
 
     def _train(self, train_data, val_data):
@@ -130,14 +125,13 @@ class BertgMLPModel:
             filepath=TRAINED_MODELS,
             save_weights_only=True,
             monitor='val_f1_score',
-            mode='max',
             save_best_only=True)
 
         self.model.fit(x=(train_data.words, train_data.head_mask, train_data.e1_mask, train_data.e2_mask,
-                          train_data.poses, train_data.synsets, train_data.relations, train_data.triples),
+                          train_data.poses, train_data.synsets, train_data.triples),
                        y=train_data.labels,
                        validation_data=((val_data.words, val_data.head_mask, val_data.e1_mask, val_data.e2_mask,
-                                         val_data.poses, val_data.synsets, val_data.relations, val_data.triples),
+                                         val_data.poses, val_data.synsets, val_data.triples),
                                         val_data.labels),
                        batch_size=16, epochs=constants.EPOCHS, callbacks=[early_stopping, model_checkpoint_callback])
 
@@ -158,7 +152,7 @@ class BertgMLPModel:
     def predict(self, test_data):
         self.model.load_weights(TRAINED_MODELS)
         pred = self.model.predict([test_data.words, test_data.head_mask, test_data.e1_mask, test_data.e2_mask,
-                                   test_data.poses, test_data.synsets, test_data.relations, test_data.triples])
+                                   test_data.poses, test_data.synsets, test_data.triples])
         y_pred = []
         for logit in pred:
             y_pred.append(np.argmax(logit))

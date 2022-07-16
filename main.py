@@ -39,7 +39,7 @@ def main():
     validation = Dataset('', '', process_data=False)
     train_ratio = 0.85
     n_sample = int(len(dev.words) * (2 * train_ratio - 1))
-    props = ['words', 'head_mask', 'e1_mask', 'e2_mask', 'labels', 'poses', 'synsets', 'relations', 'identities',
+    props = ['words', 'head_mask', 'e1_mask', 'e2_mask', 'labels', 'poses', 'synsets', 'identities',
              'triples']
 
     for prop in props:

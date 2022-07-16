@@ -1,5 +1,6 @@
 import argparse
 from transformers import TFBertModel, BertTokenizer
+from data_utils import load_vocab
 
 ALL_LABELS = ['CID', 'NONE']
 
@@ -12,7 +13,7 @@ parser.add_argument('-e', help='Number of epochs', type=int, default=80)
 parser.add_argument('-p', help='Patience of early stop (0 for ignore early stop)', type=int, default=10)
 
 parser.add_argument('-config', help='CNN configurations default \'1:128\'', type=str, default='2:32,3:96,4:32,5:64')
-parser.add_argument('-len', help='Max sentence or document length', type=int, default=64)
+parser.add_argument('-len', help='Max sentence or document length', type=int, default=96)
 
 
 opt = parser.parse_args()
@@ -62,6 +63,13 @@ encoder = TFBertModel.from_pretrained("dmis-lab/biobert-v1.1", from_pt=True)
 tokenizer = BertTokenizer.from_pretrained("dmis-lab/biobert-v1.1")
 
 ADDITIONAL_SPECIAL_TOKENS = ["<e1>", "</e1>", "<e2>", "</e2>"]
+vocab_depend = load_vocab(ALL_DEPENDS)
+
+for d in vocab_depend:
+    if d != '':
+        ADDITIONAL_SPECIAL_TOKENS.append(d.strip())
+
+# print(ADDITIONAL_SPECIAL_TOKENS)
 
 tokenizer.add_special_tokens({"additional_special_tokens": ADDITIONAL_SPECIAL_TOKENS})
 

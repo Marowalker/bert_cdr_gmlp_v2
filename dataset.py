@@ -12,7 +12,7 @@ def parse_words(raw_data):
     all_words = []
     all_poses = []
     all_synsets = []
-    all_relations = []
+    # all_relations = []
     all_labels = []
     all_identities = []
     all_triples = []
@@ -36,7 +36,7 @@ def parse_words(raw_data):
                     words = []
                     poses = []
                     synsets = []
-                    relations = []
+                    # relations = []
                     for idx, node in enumerate(nodes):
                         node = node.split('|')
                         if idx % 2 == 0:
@@ -54,18 +54,19 @@ def parse_words(raw_data):
                                     w = word.split('\\')[0]
                         else:
                             rel = node[0]
-                            relations.append(rel)
+                            words.append(rel)
+                            # relations.append(rel)
 
                     all_words.append(words)
                     all_poses.append(poses)
                     all_synsets.append(synsets)
-                    all_relations.append(relations)
+                    # all_relations.append(relations)
                     all_labels.append([label])
                     all_identities.append((pmid, pair))
             else:
                 print(l)
 
-    return all_words, all_poses, all_synsets, all_relations, all_labels, all_identities, all_triples
+    return all_words, all_poses, all_synsets, all_labels, all_identities, all_triples
 
 
 class Dataset:
@@ -96,7 +97,7 @@ class Dataset:
     def _process_data(self):
         with open(self.data_name, 'r') as f:
             raw_data = f.readlines()
-        data_words, data_pos, data_synsets, data_relations, data_y, self.identities, data_triples = parse_words(
+        data_words, data_pos, data_synsets, data_y, self.identities, data_triples = parse_words(
             raw_data)
 
         words = []
@@ -106,7 +107,7 @@ class Dataset:
         labels = []
         poses = []
         synsets = []
-        relations = []
+        # relations = []
         all_ents = []
 
         for tokens in data_words:
@@ -148,16 +149,6 @@ class Dataset:
                 m2[i] = 1 / ((t[3] - 3) - (t[2] - 2))
             e2_mask.append(m2)
 
-        for i in range(len(data_relations)):
-            rs = []
-            for r in data_relations[i]:
-                if r in self.vocab_rels:
-                    r_id = self.vocab_rels[r]
-                else:
-                    r_id = self.vocab_rels['($UNK$)']
-                rs.append(r_id)
-            relations.append(rs)
-
         for i in range(len(data_pos)):
 
             ps, ss = [], []
@@ -187,7 +178,6 @@ class Dataset:
         self.labels = labels
         self.poses = poses
         self.synsets = synsets
-        self.relations = relations
         self.triples = self.parse_triple(data_triples)
 
     def parse_triple(self, all_triples):
@@ -201,19 +191,18 @@ class Dataset:
 
     def _pad_data(self, shuffled=True):
         if shuffled:
-            word_shuffled, head_shuffle, e1_shuffle, e2_shuffle, pos_shuffled, synset_shuffled, relation_shuffled, \
-                label_shuffled, triple_shuffled = shuffle(
-                    self.words, self.head_mask, self.e1_mask, self.e2_mask, self.poses, self.synsets, self.relations,
-                    self.labels, self.triples)
+            word_shuffled, head_shuffle, e1_shuffle, e2_shuffle, pos_shuffled, synset_shuffled, \
+            label_shuffled, triple_shuffled = shuffle(
+                self.words, self.head_mask, self.e1_mask, self.e2_mask, self.poses, self.synsets,
+                self.labels, self.triples)
         else:
-            word_shuffled, head_shuffle, e1_shuffle, e2_shuffle, pos_shuffled, synset_shuffled, relation_shuffled, \
-                label_shuffled, triple_shuffled = self.words, self.head_mask, self.e1_mask, self.e2_mask, self.poses, \
-                                                  self.synsets, self.relations, self.labels, self.triples
+            word_shuffled, head_shuffle, e1_shuffle, e2_shuffle, pos_shuffled, synset_shuffled, \
+            label_shuffled, triple_shuffled = self.words, self.head_mask, self.e1_mask, self.e2_mask, self.poses, \
+                                              self.synsets, self.labels, self.triples
 
         self.words = tf.constant(pad_sequences(word_shuffled, maxlen=constants.MAX_LENGTH, padding='post'))
         self.poses = tf.constant(pad_sequences(pos_shuffled, maxlen=constants.MAX_LENGTH, padding='post'))
         self.synsets = tf.constant(pad_sequences(synset_shuffled, maxlen=constants.MAX_LENGTH, padding='post'))
-        self.relations = tf.constant(pad_sequences(relation_shuffled, maxlen=constants.MAX_LENGTH, padding='post'))
         self.labels = tf.keras.utils.to_categorical(label_shuffled)
         self.triples = tf.constant(triple_shuffled, dtype='int32')
         self.head_mask = tf.constant(head_shuffle, dtype='float32')
