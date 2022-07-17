@@ -8,7 +8,21 @@ from tensorflow.keras.preprocessing.sequence import pad_sequences
 np.random.seed(13)
 
 
+def clean_lines(lines):
+    cleaned_lines = []
+    for line in lines:
+        l = line.strip().split()
+        if len(l) == 1:
+            cleaned_lines.append(line)
+        else:
+            pair = l[0]
+            if '-1' not in pair:
+                cleaned_lines.append(line)
+    return cleaned_lines
+
+
 def parse_words(raw_data):
+    raw_data = clean_lines(raw_data)
     all_words = []
     all_poses = []
     all_synsets = []
