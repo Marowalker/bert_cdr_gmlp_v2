@@ -41,18 +41,12 @@ class BertgMLPModel:
         self.trained_models = constants.TRAINED_MODELS
 
     def _add_inputs(self):
-        # self.input_ids = tf.keras.layers.Input(shape=(self.max_length,), dtype='int32')
-        # self.head_mask = tf.keras.layers.Input(shape=(self.max_length,), dtype='float32')
-        # self.e1_mask = tf.keras.layers.Input(shape=(self.max_length,), dtype='float32')
-        # self.e2_mask = tf.keras.layers.Input(shape=(self.max_length,), dtype='float32')
-        # self.pos_ids = tf.keras.layers.Input(shape=(self.max_length,), dtype='int32')
-        # self.synset_ids = tf.keras.layers.Input(shape=(self.max_length,), dtype='int32')
-        self.input_ids = tf.keras.layers.Input(shape=(None,), dtype='int32')
-        self.head_mask = tf.keras.layers.Input(shape=(None,), dtype='float32')
-        self.e1_mask = tf.keras.layers.Input(shape=(None,), dtype='float32')
-        self.e2_mask = tf.keras.layers.Input(shape=(None,), dtype='float32')
-        self.pos_ids = tf.keras.layers.Input(shape=(None,), dtype='int32')
-        self.synset_ids = tf.keras.layers.Input(shape=(None,), dtype='int32')
+        self.input_ids = tf.keras.layers.Input(shape=(self.max_length,), dtype='int32')
+        self.head_mask = tf.keras.layers.Input(shape=(self.max_length,), dtype='float32')
+        self.e1_mask = tf.keras.layers.Input(shape=(self.max_length,), dtype='float32')
+        self.e2_mask = tf.keras.layers.Input(shape=(self.max_length,), dtype='float32')
+        self.pos_ids = tf.keras.layers.Input(shape=(self.max_length,), dtype='int32')
+        self.synset_ids = tf.keras.layers.Input(shape=(self.max_length,), dtype='int32')
         self.triple_ids = tf.keras.layers.Input(shape=(2,), dtype='int32')
 
     def _bert_layer(self):
