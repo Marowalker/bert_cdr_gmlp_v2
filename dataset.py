@@ -112,7 +112,8 @@ def parse_words(raw_data):
                                     w, p, s = word.split('\\')
                                     p = 'NN' if p == '' else p
                                     s = str(wn.synsets('entity')[0].offset()) if s == '' else s
-                                    _w, position = w.rsplit('_', 1)
+                                    # _w, position = w.rsplit('_', 1)
+                                    _w = w
                                     words.append(_w)
                                     poses.append(p)
                                     synsets.append(s)

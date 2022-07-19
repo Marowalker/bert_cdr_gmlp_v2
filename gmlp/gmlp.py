@@ -13,7 +13,7 @@ class gMLP(Model):
                  dim,
                  depth,
                  seq_len,
-                 ff_mult=2,
+                 ff_mult=4,
                  causal=False,
                  activation=None,
                  dropout_ratio=0.05,
