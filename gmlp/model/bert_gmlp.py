@@ -3,7 +3,8 @@ from tensorflow_addons.metrics import F1Score
 import constants
 from constants import *
 import numpy as np
-from gmlp.gmlp import gMLP
+# from gmlp.gmlp import gMLP
+from gmlp.simple_gmlp import gMLPLayer
 import os
 import keras.backend as K
 from data_utils import *
@@ -61,11 +62,26 @@ class BertgMLPModel:
         triple_emb = tf.keras.layers.Embedding(self.triple_emb.shape[0], constants.TRIPLE_W2V_DIM,
                                                weights=[self.triple_emb], trainable=False)(self.triple_ids)
 
-        word_x = gMLP(dim=constants.INPUT_W2V_DIM, depth=self.depth, seq_len=self.max_length,
-                      activation=tf.nn.swish)(emb)
-        pos_x = gMLP(dim=6, depth=self.depth, seq_len=self.max_length, activation=tf.nn.swish)(pos_emb)
-        synset_x = gMLP(dim=18, depth=self.depth, seq_len=self.max_length, activation=tf.nn.swish)(synset_emb)
-        triple_x = gMLP(dim=constants.TRIPLE_W2V_DIM, depth=self.depth, seq_len=2, activation=tf.nn.swish)(triple_emb)
+        # word_x = gMLP(dim=constants.INPUT_W2V_DIM, depth=self.depth, seq_len=self.max_length,
+        #               activation=tf.nn.swish)(emb)
+        # pos_x = gMLP(dim=6, depth=self.depth, seq_len=self.max_length, activation=tf.nn.swish)(pos_emb)
+        # synset_x = gMLP(dim=18, depth=self.depth, seq_len=self.max_length, activation=tf.nn.swish)(synset_emb)
+        # triple_x = gMLP(dim=constants.TRIPLE_W2V_DIM, depth=self.depth, seq_len=2, activation=tf.nn.swish)(triple_emb)
+        word_x = gMLPLayer(dropout_rate=0.05)(emb)
+        for _ in range(self.depth - 1):
+            word_x = gMLPLayer(dropout_rate=0.05)(word_x)
+
+        pos_x = gMLPLayer(dropout_rate=0.05)(pos_emb)
+        for _ in range(self.depth - 1):
+            pos_x = gMLPLayer(dropout_rate=0.05)(pos_x)
+
+        synset_x = gMLPLayer(dropout_rate=0.05)(synset_emb)
+        for _ in range(self.depth - 1):
+            synset_x = gMLPLayer(dropout_rate=0.05)(synset_x)
+
+        triple_x = gMLPLayer(dropout_rate=0.05)(triple_emb)
+        for _ in range(self.depth - 1):
+            triple_x = gMLPLayer(dropout_rate=0.05)(triple_x)
 
         head_x = mat_mul(word_x, self.head_mask)
         head_x = tf.keras.layers.Dropout(constants.DROPOUT)(head_x)
