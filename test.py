@@ -12,9 +12,9 @@ vocab_rels = load_vocab(constants.ALL_DEPENDS)
 # with open(constants.RAW_DATA + 'sdp_data_acentors_bert.train.txt') as f:
 #     lines = f.readlines()
 #
-# words, poses, synsets, relations, labels, identities, triples = parse_words(lines)
-#
-# print(relations)
+# words, poses, synsets, labels, identities, triples = parse_words(lines)
+
+# print(words)
 
 chem_vocab = make_triple_vocab(constants.DATA + 'chemical2id.txt')
 dis_vocab = make_triple_vocab(constants.DATA + 'disease2id.txt')
@@ -39,7 +39,8 @@ for prop in props:
 train.get_padded_data()
 validation.get_padded_data()
 
-print(len(train.words))
+print(train.words)
+print(train.head_mask)
 
 # wn_emb = get_trimmed_w2v_vectors('data/w2v_model/wordnet_embeddings.npz')
 #

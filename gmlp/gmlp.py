@@ -13,10 +13,10 @@ class gMLP(Model):
                  dim,
                  depth,
                  seq_len,
-                 ff_mult=4,
+                 ff_mult=2,
                  causal=False,
                  activation=None,
-                 dropout_ratio=0.1,
+                 dropout_ratio=0.05,
                  **kwargs):
 
         reg_keys = ['bias_regularizer', 'kernel_regularizer']

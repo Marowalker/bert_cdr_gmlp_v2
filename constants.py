@@ -6,14 +6,13 @@ ALL_LABELS = ['CID', 'NONE']
 
 UNK = '$UNK$'
 
-parser = argparse.ArgumentParser(description='Multi-region size CNN for re')
+parser = argparse.ArgumentParser(description='Multi-region size gMLP with BERT for re')
 parser.add_argument('-i', help='Job identity', type=int, default=0)
 parser.add_argument('-rb', help='Rebuild data', type=int, default=1)
 parser.add_argument('-e', help='Number of epochs', type=int, default=40)
-parser.add_argument('-p', help='Patience of early stop (0 for ignore early stop)', type=int, default=5)
+parser.add_argument('-p', help='Patience of early stop (0 for ignore early stop)', type=int, default=8)
 
-parser.add_argument('-config', help='CNN configurations default \'1:128\'', type=str, default='2:32,3:96,4:32,5:64')
-parser.add_argument('-len', help='Max sentence or document length', type=int, default=96)
+parser.add_argument('-len', help='Max sentence or document length', type=int, default=58)
 
 
 opt = parser.parse_args()
@@ -24,7 +23,7 @@ IS_REBUILD = opt.rb
 EPOCHS = opt.e
 EARLY_STOPPING = False if opt.p == 0 else True
 PATIENCE = opt.p
-DROPOUT = 0.3
+DROPOUT = 0.1
 
 # INPUT_W2V_DIM = 300
 # INPUT_W2V_DIM = 200
@@ -32,16 +31,6 @@ INPUT_W2V_DIM = 768
 TRIPLE_W2V_DIM = 200
 
 MAX_LENGTH = opt.len
-
-CNN_FILTERS = {}
-if opt.config:
-    print('Use model CNN with config', opt.config)
-    USE_CNN = True
-    CNN_FILTERS = {
-        int(k): int(f) for k, f in [i.split(':') for i in opt.config.split(',')]
-    }
-else:
-    raise ValueError('Configure CNN model to start')
 
 DATA = 'data/'
 RAW_DATA = DATA + 'raw_data/'

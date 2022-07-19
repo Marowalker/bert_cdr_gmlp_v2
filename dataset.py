@@ -21,6 +21,58 @@ def clean_lines(lines):
     return cleaned_lines
 
 
+def _pad_sequences(sequences, pad_tok, max_length):
+    """
+    Args:
+        sequences: a generator of list or tuple
+        pad_tok: the char to pad with
+    Returns:
+        a list of list where each sublist has same length
+    """
+    sequence_padded, sequence_length = [], []
+
+    for seq in sequences:
+        seq = list(seq)
+        seq_ = seq[:max_length] + [pad_tok] * max(max_length - len(seq), 0)
+        sequence_padded += [seq_]
+        sequence_length += [min(len(seq), max_length)]
+
+    return sequence_padded, sequence_length
+
+
+def my_pad_sequences(sequences, pad_tok, max_sent_length, dtype, nlevels=1):
+    """
+    Args:
+        sequences: a generator of list or tuple
+        pad_tok: the char to pad with
+        max_sent_length: the maximum length of the padded sentence
+        dtype: the type of the final return value
+        nlevels: the level (no. of dimensions) of the padded matrix
+    Returns:
+        a list of list where each sublist has same length
+    """
+    if nlevels == 1:
+        max_length = max(map(lambda x: len(x), sequences))
+        sequence_padded, sequence_length = _pad_sequences(sequences, pad_tok, max_length)
+
+    elif nlevels == 2:
+        max_length_word = max([max(map(lambda x: len(x), seq)) for seq in sequences])
+        sequence_padded, sequence_length = [], []
+        for seq in sequences:
+            sp, sl = _pad_sequences(seq, pad_tok, max_length_word)
+            sequence_padded += [sp]
+            sequence_length += [sl]
+
+        max_length_sentence = max(map(lambda x: len(x), sequences))
+
+        sequence_padded, _ = _pad_sequences(sequence_padded, [pad_tok] * max_length_word, max_length_sentence)
+        sequence_length, _ = _pad_sequences(sequence_length, 0, max_length_sentence)
+    else:
+        sequence_padded, sequence_length = _pad_sequences(sequences, pad_tok, max_sent_length)
+
+    return tf.constant(sequence_padded, dtype=dtype), sequence_length
+
+
 def parse_words(raw_data):
     raw_data = clean_lines(raw_data)
     all_words = []
@@ -68,7 +120,7 @@ def parse_words(raw_data):
                                     w = word.split('\\')[0]
                         else:
                             rel = node[0]
-                            words.append(rel)
+                            # words.append(rel)
                             # relations.append(rel)
 
                     all_words.append(words)
@@ -123,12 +175,15 @@ class Dataset:
         synsets = []
         # relations = []
         all_ents = []
+        # max_len_word = 0
 
         for tokens in data_words:
             tokens[0] = '<e1>' + tokens[0] + '</e1>'
             tokens[-1] = '<e2>' + tokens[-1] + '</e2>'
             sdp_sent = ' '.join(tokens)
             token_ids = constants.tokenizer.encode(sdp_sent)
+            # if max_len_word < len(token_ids):
+            #     max_len_word = len(token_ids)
             words.append(token_ids)
 
             e1_ids, e2_ids, e1_ide, e2_ide = None, None, None, None
@@ -187,6 +242,7 @@ class Dataset:
 
         self.words = words
         self.head_mask = head_mask
+        # print(self.head_mask)
         self.e1_mask = e1_mask
         self.e2_mask = e2_mask
         self.labels = labels
@@ -222,3 +278,11 @@ class Dataset:
         self.head_mask = tf.constant(head_shuffle, dtype='float32')
         self.e1_mask = tf.constant(e1_shuffle, dtype='float32')
         self.e2_mask = tf.constant(e2_shuffle, dtype='float32')
+        # self.words, _ = my_pad_sequences(word_shuffled, pad_tok=0, max_sent_length=constants.MAX_LENGTH, dtype='int32')
+        # self.poses, _ = my_pad_sequences(pos_shuffled, pad_tok=0, max_sent_length=constants.MAX_LENGTH, dtype='int32')
+        # self.synsets, _ = my_pad_sequences(synset_shuffled, pad_tok=0, max_sent_length=constants.MAX_LENGTH,
+        #                                    dtype='int32')
+        # self.head_mask, _ = my_pad_sequences(head_shuffle, pad_tok=0, max_sent_length=constants.MAX_LENGTH,
+        #                                      dtype='float32')
+        # self.e1_mask, _ = my_pad_sequences(e1_shuffle, pad_tok=0, max_sent_length=constants.MAX_LENGTH, dtype='float32')
+        # self.e2_mask, _ = my_pad_sequences(e2_shuffle, pad_tok=0, max_sent_length=constants.MAX_LENGTH, dtype='float32')

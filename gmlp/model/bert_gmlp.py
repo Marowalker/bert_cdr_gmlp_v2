@@ -41,13 +41,18 @@ class BertgMLPModel:
         self.trained_models = constants.TRAINED_MODELS
 
     def _add_inputs(self):
-        self.input_ids = tf.keras.layers.Input(shape=(self.max_length,), dtype='int32')
-        self.head_mask = tf.keras.layers.Input(shape=(self.max_length,), dtype='float32')
-        self.e1_mask = tf.keras.layers.Input(shape=(self.max_length,), dtype='float32')
-        self.e2_mask = tf.keras.layers.Input(shape=(self.max_length,), dtype='float32')
-        self.pos_ids = tf.keras.layers.Input(shape=(self.max_length,), dtype='int32')
-        self.synset_ids = tf.keras.layers.Input(shape=(self.max_length,), dtype='int32')
-        self.relation_ids = tf.keras.layers.Input(shape=(self.max_length,), dtype='int32')
+        # self.input_ids = tf.keras.layers.Input(shape=(self.max_length,), dtype='int32')
+        # self.head_mask = tf.keras.layers.Input(shape=(self.max_length,), dtype='float32')
+        # self.e1_mask = tf.keras.layers.Input(shape=(self.max_length,), dtype='float32')
+        # self.e2_mask = tf.keras.layers.Input(shape=(self.max_length,), dtype='float32')
+        # self.pos_ids = tf.keras.layers.Input(shape=(self.max_length,), dtype='int32')
+        # self.synset_ids = tf.keras.layers.Input(shape=(self.max_length,), dtype='int32')
+        self.input_ids = tf.keras.layers.Input(shape=(None,), dtype='int32')
+        self.head_mask = tf.keras.layers.Input(shape=(None,), dtype='float32')
+        self.e1_mask = tf.keras.layers.Input(shape=(None,), dtype='float32')
+        self.e2_mask = tf.keras.layers.Input(shape=(None,), dtype='float32')
+        self.pos_ids = tf.keras.layers.Input(shape=(None,), dtype='int32')
+        self.synset_ids = tf.keras.layers.Input(shape=(None,), dtype='int32')
         self.triple_ids = tf.keras.layers.Input(shape=(2,), dtype='int32')
 
     def _bert_layer(self):
@@ -109,7 +114,7 @@ class BertgMLPModel:
             inputs=[self.input_ids, self.head_mask, self.e1_mask, self.e2_mask, self.pos_ids, self.synset_ids,
                     self.triple_ids],
             outputs=self._bert_layer())
-        self.optimizer = tf.keras.optimizers.Adam(lr=2e-6)
+        self.optimizer = tf.keras.optimizers.Adam(lr=2e-5)
 
         self.model.compile(optimizer=self.optimizer, loss='binary_crossentropy', metrics=['accuracy',
                                                                                           F1Score(num_classes=2,
