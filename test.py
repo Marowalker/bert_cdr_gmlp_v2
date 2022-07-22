@@ -19,11 +19,11 @@ vocab_rels = load_vocab(constants.ALL_DEPENDS)
 chem_vocab = make_triple_vocab(constants.DATA + 'chemical2id.txt')
 dis_vocab = make_triple_vocab(constants.DATA + 'disease2id.txt')
 
-train = Dataset(constants.RAW_DATA + 'sentence_ref_with_feature.train.txt', vocab_poses=vocab_poses,
+train = Dataset(constants.RAW_DATA + 'sdp_data_acentors_bert.train.txt', vocab_poses=vocab_poses,
                 vocab_synset=vocab_synsets, vocab_rels=vocab_rels, vocab_chems=chem_vocab, vocab_dis=dis_vocab)
-dev = Dataset(constants.RAW_DATA + 'sentence_ref_with_feature.dev.txt', vocab_poses=vocab_poses,
+dev = Dataset(constants.RAW_DATA + 'sdp_data_acentors_bert.dev.txt', vocab_poses=vocab_poses,
               vocab_synset=vocab_synsets, vocab_rels=vocab_rels, vocab_chems=chem_vocab, vocab_dis=dis_vocab)
-test = Dataset(constants.RAW_DATA + 'sentence_ref_with_feature.test.txt', vocab_poses=vocab_poses,
+test = Dataset(constants.RAW_DATA + 'sdp_data_acentors_bert.test.txt', vocab_poses=vocab_poses,
                vocab_synset=vocab_synsets, vocab_rels=vocab_rels, vocab_chems=chem_vocab, vocab_dis=dis_vocab)
 
 # Train, Validation Split
@@ -36,11 +36,11 @@ for prop in props:
     train.__dict__[prop].extend(dev.__dict__[prop][:n_sample])
     validation.__dict__[prop] = dev.__dict__[prop][n_sample:]
 
-train.get_padded_data()
-validation.get_padded_data()
+# train.get_padded_data()
+# validation.get_padded_data()
 
-print(train.words)
-print(train.head_mask)
+print(train.labels)
+# print(train.head_mask)
 
 # wn_emb = get_trimmed_w2v_vectors('data/w2v_model/wordnet_embeddings.npz')
 #

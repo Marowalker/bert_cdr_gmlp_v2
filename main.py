@@ -5,6 +5,7 @@ import pickle
 import tensorflow as tf
 from evaluate.bc5 import evaluate_bc5
 from gmlp.model.bert_gmlp import BertgMLPModel
+from gmlp.model.bert_gmlp_compat import BERTgMLPModel
 
 
 def main():
@@ -17,15 +18,15 @@ def main():
         chem_vocab = make_triple_vocab(constants.DATA + 'chemical2id.txt')
         dis_vocab = make_triple_vocab(constants.DATA + 'disease2id.txt')
 
-        train = Dataset(constants.RAW_DATA + 'sdp_data_acentors_bert.train.txt', vocab_poses=vocab_poses,
+        train = Dataset(constants.RAW_DATA + 'sdp_data_acentors.train.txt', vocab_poses=vocab_poses,
                         vocab_synset=vocab_synsets, vocab_rels=vocab_rels, vocab_chems=chem_vocab, vocab_dis=dis_vocab)
         pickle.dump(train, open(constants.PICKLE_DATA + 'train.pickle', 'wb'), pickle.HIGHEST_PROTOCOL)
 
-        dev = Dataset(constants.RAW_DATA + 'sdp_data_acentors_bert.dev.txt', vocab_poses=vocab_poses,
+        dev = Dataset(constants.RAW_DATA + 'sdp_data_acentors.dev.txt', vocab_poses=vocab_poses,
                       vocab_synset=vocab_synsets, vocab_rels=vocab_rels, vocab_chems=chem_vocab, vocab_dis=dis_vocab)
         pickle.dump(dev, open(constants.PICKLE_DATA + 'dev.pickle', 'wb'), pickle.HIGHEST_PROTOCOL)
 
-        test = Dataset(constants.RAW_DATA + 'sdp_data_acentors_bert.test.txt', vocab_poses=vocab_poses,
+        test = Dataset(constants.RAW_DATA + 'sdp_data_acentors.test.txt', vocab_poses=vocab_poses,
                        vocab_synset=vocab_synsets, vocab_rels=vocab_rels, vocab_chems=chem_vocab, vocab_dis=dis_vocab)
         pickle.dump(test, open(constants.PICKLE_DATA + 'test.pickle', 'wb'), pickle.HIGHEST_PROTOCOL)
 
@@ -46,9 +47,9 @@ def main():
         train.__dict__[prop].extend(dev.__dict__[prop][:n_sample])
         validation.__dict__[prop] = dev.__dict__[prop][n_sample:]
 
-    train.get_padded_data()
-    validation.get_padded_data()
-    test.get_padded_data(shuffled=False)
+    # train.get_padded_data()
+    # validation.get_padded_data()
+    # test.get_padded_data(shuffled=False)
 
     print("Train shape: ", len(train.words))
     print("Test shape: ", len(test.words))
@@ -64,9 +65,20 @@ def main():
         dis_emb = pickle.load(f)
         f.close()
 
-    model = BertgMLPModel(base_encoder=constants.encoder, depth=4, chem_emb=chem_emb, dis_emb=dis_emb,
+    # model = BertgMLPModel(base_encoder=constants.encoder, depth=4, chem_emb=chem_emb, dis_emb=dis_emb,
+    #                       wordnet_emb=wn_emb)
+    # model.build(train, validation)
+    model = BERTgMLPModel(model_name=constants.MODEL_NAMES.format('gmlp', constants.JOB_IDENTITY),
+                          base_encoder=constants.encoder,
+                          depth=5,
+                          chem_emb=chem_emb,
+                          dis_emb=dis_emb,
                           wordnet_emb=wn_emb)
-    model.build(train, validation)
+    model.build()
+
+    model.load_data(train=train, validation=validation)
+    model.run_train(epochs=constants.EPOCHS, early_stopping=constants.EARLY_STOPPING, patience=constants.PATIENCE)
+
     y_pred = model.predict(test)
     answer = {}
     identities = test.identities

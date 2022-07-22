@@ -40,7 +40,7 @@ def _pad_sequences(sequences, pad_tok, max_length):
     return sequence_padded, sequence_length
 
 
-def my_pad_sequences(sequences, pad_tok, max_sent_length, dtype, nlevels=1):
+def my_pad_sequences(sequences, pad_tok, max_sent_length, nlevels=1):
     """
     Args:
         sequences: a generator of list or tuple
@@ -52,7 +52,8 @@ def my_pad_sequences(sequences, pad_tok, max_sent_length, dtype, nlevels=1):
         a list of list where each sublist has same length
     """
     if nlevels == 1:
-        max_length = max(map(lambda x: len(x), sequences))
+        # max_length = max(map(lambda x: len(x), sequences))
+        max_length = max_sent_length
         sequence_padded, sequence_length = _pad_sequences(sequences, pad_tok, max_length)
 
     elif nlevels == 2:
@@ -70,7 +71,7 @@ def my_pad_sequences(sequences, pad_tok, max_sent_length, dtype, nlevels=1):
     else:
         sequence_padded, sequence_length = _pad_sequences(sequences, pad_tok, max_sent_length)
 
-    return tf.constant(sequence_padded, dtype=dtype), sequence_length
+    return np.array(sequence_padded), sequence_length
 
 
 def parse_words(raw_data):
