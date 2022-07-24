@@ -5,7 +5,7 @@ import pickle
 import tensorflow as tf
 from evaluate.bc5 import evaluate_bc5
 from gmlp.model.bert_gmlp import BertgMLPModel
-from gmlp.model.bert_gmlp_compat import BERTgMLPModel
+# from gmlp.model.bert_gmlp_compat import BERTgMLPModel
 
 
 def main():
@@ -41,15 +41,15 @@ def main():
     train_ratio = 0.85
     n_sample = int(len(dev.words) * (2 * train_ratio - 1))
     props = ['words', 'head_mask', 'e1_mask', 'e2_mask', 'labels', 'poses', 'synsets', 'identities',
-             'triples']
+             'triples', 'positions_1', 'positions_2']
 
     for prop in props:
         train.__dict__[prop].extend(dev.__dict__[prop][:n_sample])
         validation.__dict__[prop] = dev.__dict__[prop][n_sample:]
 
-    # train.get_padded_data()
-    # validation.get_padded_data()
-    # test.get_padded_data(shuffled=False)
+    train.get_padded_data()
+    validation.get_padded_data()
+    test.get_padded_data(shuffled=False)
 
     print("Train shape: ", len(train.words))
     print("Test shape: ", len(test.words))
@@ -65,19 +65,19 @@ def main():
         dis_emb = pickle.load(f)
         f.close()
 
-    # model = BertgMLPModel(base_encoder=constants.encoder, depth=4, chem_emb=chem_emb, dis_emb=dis_emb,
-    #                       wordnet_emb=wn_emb)
-    # model.build(train, validation)
-    model = BERTgMLPModel(model_name=constants.MODEL_NAMES.format('gmlp', constants.JOB_IDENTITY),
-                          base_encoder=constants.encoder,
-                          depth=5,
-                          chem_emb=chem_emb,
-                          dis_emb=dis_emb,
+    model = BertgMLPModel(base_encoder=constants.encoder, depth=4, chem_emb=chem_emb, dis_emb=dis_emb,
                           wordnet_emb=wn_emb)
-    model.build()
-
-    model.load_data(train=train, validation=validation)
-    model.run_train(epochs=constants.EPOCHS, early_stopping=constants.EARLY_STOPPING, patience=constants.PATIENCE)
+    model.build(train, validation)
+    # model = BERTgMLPModel(model_name=constants.MODEL_NAMES.format('gmlp', constants.JOB_IDENTITY),
+    #                       base_encoder=constants.encoder,
+    #                       depth=5,
+    #                       chem_emb=chem_emb,
+    #                       dis_emb=dis_emb,
+    #                       wordnet_emb=wn_emb)
+    # model.build()
+    #
+    # model.load_data(train=train, validation=validation)
+    # model.run_train(epochs=constants.EPOCHS, early_stopping=constants.EARLY_STOPPING, patience=constants.PATIENCE)
 
     y_pred = model.predict(test)
     answer = {}
