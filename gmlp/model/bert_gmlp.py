@@ -144,10 +144,12 @@ class BertgMLPModel:
             outputs=self._bert_layer())
         self.optimizer = tf.keras.optimizers.Adam(lr=4e-6)
 
+        # self.model.compile(optimizer=self.optimizer, loss='binary_crossentropy', metrics=['accuracy',
+        #                                                                                   F1Score(num_classes=2,
+        #                                                                                           average="macro",
+        #                                                                                           threshold=0.5)])
         self.model.compile(optimizer=self.optimizer, loss='binary_crossentropy', metrics=['accuracy',
-                                                                                          F1Score(num_classes=2,
-                                                                                                  average="macro",
-                                                                                                  threshold=0.5)])
+                                                                                          self.f1_score])
         print(self.model.summary())
 
     def _train(self, train_data, val_data):
