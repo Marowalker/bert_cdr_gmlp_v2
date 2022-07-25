@@ -23,7 +23,7 @@ IS_REBUILD = opt.rb
 EPOCHS = opt.e
 EARLY_STOPPING = False if opt.p == 0 else True
 PATIENCE = opt.p
-DROPOUT = 0.1
+DROPOUT = 0.5
 
 # INPUT_W2V_DIM = 300
 # INPUT_W2V_DIM = 200
