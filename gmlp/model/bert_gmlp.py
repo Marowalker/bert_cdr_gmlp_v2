@@ -107,23 +107,23 @@ class BertgMLPModel:
 
         pos_x = tf.keras.layers.Flatten(data_format="channels_first")(pos_x)
         pos_x = tf.keras.layers.LayerNormalization()(pos_x)
-        # pos_x = tf.keras.layers.Dropout(constants.DROPOUT)(pos_x)
+        pos_x = tf.keras.layers.Dropout(constants.DROPOUT)(pos_x)
         pos_x = tf.keras.layers.Dense(6)(pos_x)
 
         synset_x = tf.keras.layers.Flatten(data_format="channels_first")(synset_x)
         synset_x = tf.keras.layers.LayerNormalization()(synset_x)
-        # synset_x = tf.keras.layers.Dropout(constants.DROPOUT)(synset_x)
+        synset_x = tf.keras.layers.Dropout(constants.DROPOUT)(synset_x)
         synset_x = tf.keras.layers.Dense(18)(synset_x)
 
         triple_x = tf.keras.layers.Flatten(data_format="channels_first")(triple_x)
         triple_x = tf.keras.layers.LayerNormalization()(triple_x)
-        # triple_x = tf.keras.layers.Dropout(constants.DROPOUT)(triple_x)
+        triple_x = tf.keras.layers.Dropout(constants.DROPOUT)(triple_x)
         triple_x = tf.keras.layers.Dense(constants.TRIPLE_W2V_DIM)(triple_x)
 
         position_x = tf.keras.layers.Flatten(data_format="channels_first")(position_x)
         position_x = tf.keras.layers.LayerNormalization()(position_x)
-        # triple_x = tf.keras.layers.Dropout(constants.DROPOUT)(triple_x)
-        position_x = tf.keras.layers.Dense(25)(position_x)
+        position_x = tf.keras.layers.Dropout(constants.DROPOUT)(position_x)
+        position_x = tf.keras.layers.Dense(50)(position_x)
 
         x = tf.keras.layers.concatenate([head_x, e1_x, e2_x, pos_x, synset_x, position_x, triple_x])
 
@@ -142,7 +142,7 @@ class BertgMLPModel:
             inputs=[self.input_ids, self.head_mask, self.e1_mask, self.e2_mask, self.pos_ids, self.synset_ids,
                     self.triple_ids, self.position_1_ids, self.position_2_ids],
             outputs=self._bert_layer())
-        self.optimizer = tf.keras.optimizers.Adam(lr=1e-6)
+        self.optimizer = tf.keras.optimizers.Adam(lr=3e-6)
 
         # self.model.compile(optimizer=self.optimizer, loss='binary_crossentropy', metrics=['accuracy',
         #                                                                                   F1Score(num_classes=2,
