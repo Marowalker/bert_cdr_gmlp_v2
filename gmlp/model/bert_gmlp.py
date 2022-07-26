@@ -148,8 +148,9 @@ class BertgMLPModel:
         #                                                                                   F1Score(num_classes=2,
         #                                                                                           average="macro",
         #                                                                                           threshold=0.5)])
-        self.model.compile(optimizer=self.optimizer, loss='binary_crossentropy', metrics=['accuracy',
-                                                                                          self.f1_score])
+        self.model.compile(optimizer=self.optimizer,
+                           loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
+                           metrics=['accuracy', self.f1_score])
         print(self.model.summary())
 
     def _train(self, train_data, val_data):
