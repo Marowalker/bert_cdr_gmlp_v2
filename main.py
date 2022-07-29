@@ -65,7 +65,7 @@ def main():
         dis_emb = pickle.load(f)
         f.close()
 
-    model = BertgMLPModel(base_encoder=constants.encoder, depth=4, chem_emb=chem_emb, dis_emb=dis_emb,
+    model = BertgMLPModel(base_encoder=constants.encoder, depth=6, chem_emb=chem_emb, dis_emb=dis_emb,
                           wordnet_emb=wn_emb)
     model.build(train, validation)
     # model = BERTgMLPModel(model_name=constants.MODEL_NAMES.format('gmlp', constants.JOB_IDENTITY),
