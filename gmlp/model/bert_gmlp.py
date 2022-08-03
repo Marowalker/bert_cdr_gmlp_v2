@@ -49,8 +49,8 @@ class BertgMLPModel:
         self.pos_ids = tf.keras.layers.Input(shape=(self.max_length,), dtype='int32')
         self.synset_ids = tf.keras.layers.Input(shape=(self.max_length,), dtype='int32')
         self.triple_ids = tf.keras.layers.Input(shape=(2,), dtype='int32')
-        self.position_1_ids = tf.keras.layers.Input(shape=(self.max_length,), dtype='int32')
-        self.position_2_ids = tf.keras.layers.Input(shape=(self.max_length,), dtype='int32')
+        # self.position_1_ids = tf.keras.layers.Input(shape=(self.max_length,), dtype='int32')
+        # self.position_2_ids = tf.keras.layers.Input(shape=(self.max_length,), dtype='int32')
 
     def _bert_layer(self):
         self.bertoutput = self.encoder(self.input_ids)
@@ -63,19 +63,20 @@ class BertgMLPModel:
 
         triple_emb = tf.keras.layers.Embedding(self.triple_emb.shape[0], constants.TRIPLE_W2V_DIM,
                                                weights=[self.triple_emb], trainable=False)(self.triple_ids)
-        positions_1_emb = tf.keras.layers.Embedding(self.max_length * 2, 25)(
-            self.position_1_ids)
-        positions_2_emb = tf.keras.layers.Embedding(self.max_length * 2, 25)(
-            self.position_2_ids)
-        position_emb = tf.concat([positions_1_emb, positions_2_emb], axis=-1)
+
+        # positions_1_emb = tf.keras.layers.Embedding(self.max_length * 2, 25)(
+        #     self.position_1_ids)
+        # positions_2_emb = tf.keras.layers.Embedding(self.max_length * 2, 25)(
+        #     self.position_2_ids)
+        # position_emb = tf.concat([positions_1_emb, positions_2_emb], axis=-1)
 
         word_x = gMLP(dim=constants.INPUT_W2V_DIM, depth=self.depth, seq_len=self.max_length,
                       activation=tf.nn.swish)(emb)
         pos_x = gMLP(dim=6, depth=self.depth, seq_len=self.max_length, activation=tf.nn.swish)(pos_emb)
         synset_x = gMLP(dim=18, depth=self.depth, seq_len=self.max_length, activation=tf.nn.swish)(synset_emb)
         triple_x = gMLP(dim=constants.TRIPLE_W2V_DIM, depth=self.depth, seq_len=2, activation=tf.nn.swish)(triple_emb)
-        position_x = gMLP(dim=50, depth=self.depth, seq_len=self.max_length, activation=tf.nn.swish)(
-            position_emb)
+        # position_x = gMLP(dim=50, depth=self.depth, seq_len=self.max_length, activation=tf.nn.swish)(
+        #     position_emb)
 
         # word_x = gMLPLayer(dropout_rate=0.05)(emb)
         # for _ in range(self.depth - 1):
@@ -112,7 +113,7 @@ class BertgMLPModel:
 
         synset_x = tf.keras.layers.Flatten(data_format="channels_first")(synset_x)
         synset_x = tf.keras.layers.LayerNormalization()(synset_x)
-        synset_x = tf.keras.layers.Dropout(constants.DROPOUT)(synset_x)
+        # synset_x = tf.keras.layers.Dropout(constants.DROPOUT)(synset_x)
         synset_x = tf.keras.layers.Dense(18)(synset_x)
 
         triple_x = tf.keras.layers.Flatten(data_format="channels_first")(triple_x)
@@ -120,12 +121,13 @@ class BertgMLPModel:
         # triple_x = tf.keras.layers.Dropout(constants.DROPOUT)(triple_x)
         triple_x = tf.keras.layers.Dense(constants.TRIPLE_W2V_DIM)(triple_x)
 
-        position_x = tf.keras.layers.Flatten(data_format="channels_first")(position_x)
-        position_x = tf.keras.layers.LayerNormalization()(position_x)
-        # position_x = tf.keras.layers.Dropout(constants.DROPOUT)(position_x)
-        position_x = tf.keras.layers.Dense(50)(position_x)
-
-        x = tf.keras.layers.concatenate([head_x, e1_x, e2_x, pos_x, synset_x, position_x, triple_x])
+        # position_x = tf.keras.layers.Flatten(data_format="channels_first")(position_x)
+        # position_x = tf.keras.layers.LayerNormalization()(position_x)
+        # # position_x = tf.keras.layers.Dropout(constants.DROPOUT)(position_x)
+        # position_x = tf.keras.layers.Dense(50)(position_x)
+        #
+        # x = tf.keras.layers.concatenate([head_x, e1_x, e2_x, pos_x, synset_x, position_x, triple_x])
+        x = tf.keras.layers.concatenate([head_x, e1_x, e2_x, pos_x, synset_x, triple_x])
 
         out = tf.keras.layers.Dropout(DROPOUT)(x)
         out = tf.keras.layers.Dense(128)(out)
@@ -139,8 +141,10 @@ class BertgMLPModel:
 
     def _add_train_ops(self):
         self.model = tf.keras.Model(
+            # inputs=[self.input_ids, self.head_mask, self.e1_mask, self.e2_mask, self.pos_ids, self.synset_ids,
+            #         self.triple_ids, self.position_1_ids, self.position_2_ids],
             inputs=[self.input_ids, self.head_mask, self.e1_mask, self.e2_mask, self.pos_ids, self.synset_ids,
-                    self.triple_ids, self.position_1_ids, self.position_2_ids],
+                    self.triple_ids],
             outputs=self._bert_layer())
         self.optimizer = tf.keras.optimizers.Adam(lr=4e-6)
 
@@ -166,12 +170,10 @@ class BertgMLPModel:
             save_best_only=True)
 
         self.model.fit(x=(train_data.words, train_data.head_mask, train_data.e1_mask, train_data.e2_mask,
-                          train_data.poses, train_data.synsets, train_data.triples,
-                          train_data.positions_1, train_data.positions_2),
+                          train_data.poses, train_data.synsets, train_data.triples),
                        y=train_data.labels,
                        validation_data=((val_data.words, val_data.head_mask, val_data.e1_mask, val_data.e2_mask,
-                                         val_data.poses, val_data.synsets, val_data.triples, val_data.positions_1,
-                                         val_data.positions_2),
+                                         val_data.poses, val_data.synsets, val_data.triples),
                                         val_data.labels),
                        batch_size=16, epochs=constants.EPOCHS, callbacks=[early_stopping, model_checkpoint_callback])
 
@@ -192,8 +194,7 @@ class BertgMLPModel:
     def predict(self, test_data):
         self.model.load_weights(TRAINED_MODELS)
         pred = self.model.predict([test_data.words, test_data.head_mask, test_data.e1_mask, test_data.e2_mask,
-                                   test_data.poses, test_data.synsets, test_data.triples, test_data.positions_1,
-                                   test_data.positions_2])
+                                   test_data.poses, test_data.synsets, test_data.triples])
         y_pred = []
         for logit in pred:
             y_pred.append(np.argmax(logit))
