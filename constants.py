@@ -12,7 +12,7 @@ parser.add_argument('-rb', help='Rebuild data', type=int, default=1)
 parser.add_argument('-e', help='Number of epochs', type=int, default=20)
 parser.add_argument('-p', help='Patience of early stop (0 for ignore early stop)', type=int, default=5)
 
-parser.add_argument('-len', help='Max sentence or document length', type=int, default=310)
+parser.add_argument('-len', help='Max sentence or document length', type=int, default=96)
 
 
 opt = parser.parse_args()
