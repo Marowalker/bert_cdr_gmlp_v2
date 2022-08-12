@@ -338,7 +338,6 @@ class Dataset:
         self.e1_mask = e1_mask
         self.e2_mask = e2_mask
         self.relations = relations
-        print(max([len(r) for r in self.relations]))
         self.labels = labels
         self.poses = poses
         self.synsets = synsets

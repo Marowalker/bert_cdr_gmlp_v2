@@ -81,7 +81,7 @@ class BertgMLPModel:
         triple_x = gMLP(dim=constants.TRIPLE_W2V_DIM, depth=self.depth, seq_len=2, activation=tf.nn.swish)(triple_emb)
         # position_x = gMLP(dim=50, depth=self.depth, seq_len=self.max_length, activation=tf.nn.swish)(
         #     position_emb)
-        relation_x = gMLP(dim=18, depth=self.depth, seq_len=self.max_length, activation=tf.nn.swish)(relation_emb)
+        relation_x = gMLP(dim=18, depth=self.depth, seq_len=24, activation=tf.nn.swish)(relation_emb)
 
         # word_x = gMLPLayer(dropout_rate=0.05)(emb)
         # for _ in range(self.depth - 1):
