@@ -201,10 +201,11 @@ def parse_words(raw_data):
 
 
 class Dataset:
-    def __init__(self, data_name, vocab_poses=None, vocab_synset=None, vocab_rels=None, vocab_chems=None,
+    def __init__(self, data_name, sdp_name, vocab_poses=None, vocab_synset=None, vocab_rels=None, vocab_chems=None,
                  vocab_dis=None,
                  process_data=True):
         self.data_name = data_name
+        self.sdp_name = sdp_name
 
         self.vocab_poses = vocab_poses
         self.vocab_synsets = vocab_synset
@@ -228,14 +229,16 @@ class Dataset:
     def _process_data(self):
         with open(self.data_name, 'r') as f:
             raw_data = f.readlines()
+        with open(self.sdp_name, 'r') as f1:
+            raw_sdp = f1.readlines()
         data_words, data_pos, data_synsets, data_relations, data_y, self.identities, data_triples, data_positions = \
-            parse_words(raw_data)
-        # data_words, data_pos, data_synsets, data_y, self.identities, data_triples = parse_sent(
-        #     raw_data)
+            parse_words(raw_sdp)
+        data_words, data_pos, data_synsets, data_y, self.identities, data_triples = parse_sent(
+            raw_data)
 
         words = []
-        positions_1 = []
-        positions_2 = []
+        # positions_1 = []
+        # positions_2 = []
         head_mask = []
         e1_mask = []
         e2_mask = []
@@ -246,19 +249,19 @@ class Dataset:
         all_ents = []
         # max_len_word = 0
 
-        for i in range(len(data_positions)):
-            position_1, position_2 = [], []
-            e1 = data_positions[i][0]
-            e2 = data_positions[i][-1]
-            for po in data_positions[i]:
-                position_1.append((po - e1 + constants.MAX_LENGTH) // 5 + 1)
-                position_2.append((po - e2 + constants.MAX_LENGTH) // 5 + 1)
-            positions_1.append(position_1)
-            positions_2.append(position_2)
+        # for i in range(len(data_positions)):
+        #     position_1, position_2 = [], []
+        #     e1 = data_positions[i][0]
+        #     e2 = data_positions[i][-1]
+        #     for po in data_positions[i]:
+        #         position_1.append((po - e1 + constants.MAX_LENGTH) // 5 + 1)
+        #         position_2.append((po - e2 + constants.MAX_LENGTH) // 5 + 1)
+        #     positions_1.append(position_1)
+        #     positions_2.append(position_2)
 
         for tokens in data_words:
-            tokens[0] = '<e1>' + tokens[0] + '</e1>'
-            tokens[-1] = '<e2>' + tokens[-1] + '</e2>'
+            # tokens[0] = '<e1>' + tokens[0] + '</e1>'
+            # tokens[-1] = '<e2>' + tokens[-1] + '</e2>'
             sdp_sent = ' '.join(tokens)
             token_ids = constants.tokenizer.encode(sdp_sent)
             # if max_len_word < len(token_ids):
@@ -329,18 +332,18 @@ class Dataset:
                 rs.append(r_id)
             relations.append(rs)
 
-
         self.words = words
         self.head_mask = head_mask
         # print(self.head_mask)
         self.e1_mask = e1_mask
         self.e2_mask = e2_mask
         self.relations = relations
+        print(max([len(r) for r in self.relations]))
         self.labels = labels
         self.poses = poses
         self.synsets = synsets
-        self.positions_1 = positions_1
-        self.positions_2 = positions_2
+        # self.positions_1 = positions_1
+        # self.positions_2 = positions_2
         self.triples = self.parse_triple(data_triples)
 
     def parse_triple(self, all_triples):
@@ -355,10 +358,9 @@ class Dataset:
     def _pad_data(self, shuffled=True):
         if shuffled:
             word_shuffled, head_shuffle, e1_shuffle, e2_shuffle, pos_shuffled, synset_shuffled, relation_shuffled, \
-            label_shuffled, triple_shuffled, positions_1_shuffle, positions_2_shuffle = shuffle(
+            label_shuffled, triple_shuffled = shuffle(
                 self.words, self.head_mask, self.e1_mask, self.e2_mask, self.poses,
-                self.synsets, self.relations, self.labels, self.triples, self.positions_1,
-                self.positions_2)
+                self.synsets, self.relations, self.labels, self.triples)
             # word_shuffled, head_shuffle, e1_shuffle, e2_shuffle, pos_shuffled, synset_shuffled, \
             # label_shuffled, triple_shuffled = shuffle(
             #     self.words, self.head_mask, self.e1_mask, self.e2_mask, self.poses,
@@ -369,18 +371,18 @@ class Dataset:
             #     self.words, self.head_mask, self.e1_mask, self.e2_mask, self.poses, \
             #     self.synsets, self.labels, self.triples
             word_shuffled, head_shuffle, e1_shuffle, e2_shuffle, pos_shuffled, synset_shuffled, relation_shuffled, \
-            label_shuffled, triple_shuffled, positions_1_shuffle, positions_2_shuffle = \
+            label_shuffled, triple_shuffled = \
                 self.words, self.head_mask, self.e1_mask, self.e2_mask, self.poses, \
-                self.synsets, self.relations, self.labels, self.triples, self.positions_1, self.positions_2
+                self.synsets, self.relations, self.labels, self.triples
 
         self.words = tf.constant(pad_sequences(word_shuffled, maxlen=constants.MAX_LENGTH, padding='post'))
         self.poses = tf.constant(pad_sequences(pos_shuffled, maxlen=constants.MAX_LENGTH, padding='post'))
         self.synsets = tf.constant(pad_sequences(synset_shuffled, maxlen=constants.MAX_LENGTH, padding='post'))
-        self.relations = tf.constant(pad_sequences(relation_shuffled, maxlen=constants.MAX_LENGTH, padding='post'))
+        self.relations = tf.constant(pad_sequences(relation_shuffled, maxlen=24, padding='post'))
         self.labels = tf.keras.utils.to_categorical(label_shuffled)
         # self.labels = tf.constant(label_shuffled, dtype='float32')
-        self.positions_1 = tf.constant(pad_sequences(positions_1_shuffle, maxlen=constants.MAX_LENGTH, padding='post'))
-        self.positions_2 = tf.constant(pad_sequences(positions_2_shuffle, maxlen=constants.MAX_LENGTH, padding='post'))
+        # self.positions_1 = tf.constant(pad_sequences(positions_1_shuffle, maxlen=constants.MAX_LENGTH, padding='post'))
+        # self.positions_2 = tf.constant(pad_sequences(positions_2_shuffle, maxlen=constants.MAX_LENGTH, padding='post'))
         self.triples = tf.constant(triple_shuffled, dtype='int32')
         self.head_mask = tf.constant(head_shuffle, dtype='float32')
         self.e1_mask = tf.constant(e1_shuffle, dtype='float32')

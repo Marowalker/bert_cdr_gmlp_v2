@@ -18,15 +18,21 @@ def main():
         chem_vocab = make_triple_vocab(constants.DATA + 'chemical2id.txt')
         dis_vocab = make_triple_vocab(constants.DATA + 'disease2id.txt')
 
-        train = Dataset(constants.RAW_DATA + 'sdp_data_acentors.train.txt', vocab_poses=vocab_poses,
+        train = Dataset(constants.RAW_DATA + 'sentence_data_acentors.train.txt',
+                        constants.RAW_DATA + 'sdp_data_acentors_bert.train.txt',
+                        vocab_poses=vocab_poses,
                         vocab_synset=vocab_synsets, vocab_rels=vocab_rels, vocab_chems=chem_vocab, vocab_dis=dis_vocab)
         pickle.dump(train, open(constants.PICKLE_DATA + 'train.pickle', 'wb'), pickle.HIGHEST_PROTOCOL)
 
-        dev = Dataset(constants.RAW_DATA + 'sdp_data_acentors.dev.txt', vocab_poses=vocab_poses,
+        dev = Dataset(constants.RAW_DATA + 'sentence_data_acentors.dev.txt',
+                      constants.RAW_DATA + 'sdp_data_acentors_bert.dev.txt',
+                      vocab_poses=vocab_poses,
                       vocab_synset=vocab_synsets, vocab_rels=vocab_rels, vocab_chems=chem_vocab, vocab_dis=dis_vocab)
         pickle.dump(dev, open(constants.PICKLE_DATA + 'dev.pickle', 'wb'), pickle.HIGHEST_PROTOCOL)
 
-        test = Dataset(constants.RAW_DATA + 'sdp_data_acentors.test.txt', vocab_poses=vocab_poses,
+        test = Dataset(constants.RAW_DATA + 'sentence_data_acentors.test.txt',
+                       constants.RAW_DATA + 'sdp_data_acentors_bert.test.txt',
+                       vocab_poses=vocab_poses,
                        vocab_synset=vocab_synsets, vocab_rels=vocab_rels, vocab_chems=chem_vocab, vocab_dis=dis_vocab)
         pickle.dump(test, open(constants.PICKLE_DATA + 'test.pickle', 'wb'), pickle.HIGHEST_PROTOCOL)
 
@@ -41,7 +47,7 @@ def main():
     train_ratio = 0.85
     n_sample = int(len(dev.words) * (2 * train_ratio - 1))
     props = ['words', 'head_mask', 'e1_mask', 'e2_mask', 'labels', 'poses', 'synsets', 'relations', 'identities',
-             'triples', 'positions_1', 'positions_2']
+             'triples']
     # props = ['words', 'head_mask', 'e1_mask', 'e2_mask', 'labels', 'poses', 'synsets', 'identities',
     #          'triples']
 
