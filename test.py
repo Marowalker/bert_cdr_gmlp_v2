@@ -43,7 +43,7 @@ dev = Dataset(constants.RAW_DATA + 'sentence_data_acentors.dev.txt',
               vocab_synset=vocab_synsets, vocab_rels=vocab_rels, vocab_chems=chem_vocab, vocab_dis=dis_vocab)
 pickle.dump(dev, open(constants.PICKLE_DATA + 'dev.pickle', 'wb'), pickle.HIGHEST_PROTOCOL)
 
-test = Dataset(constants.RAW_DATA + 'sentence_data_acwentors.test.txt',
+test = Dataset(constants.RAW_DATA + 'sentence_data_acentors.test.txt',
                constants.RAW_DATA + 'sdp_data_acentors_bert.test.txt',
                vocab_poses=vocab_poses,
                vocab_synset=vocab_synsets, vocab_rels=vocab_rels, vocab_chems=chem_vocab, vocab_dis=dis_vocab)
