@@ -49,7 +49,7 @@ class BertgMLPModel:
         self.e2_mask = tf.keras.layers.Input(shape=(self.max_length,), dtype='float32')
         self.pos_ids = tf.keras.layers.Input(shape=(self.max_length,), dtype='int32')
         self.synset_ids = tf.keras.layers.Input(shape=(self.max_length,), dtype='int32')
-        self.relation_ids = tf.keras.layers.Input(shape=(24,), dtype='int32')
+        self.relation_ids = tf.keras.layers.Input(shape=(18,), dtype='int32')
         self.triple_ids = tf.keras.layers.Input(shape=(2,), dtype='int32')
         # self.position_1_ids = tf.keras.layers.Input(shape=(self.max_length,), dtype='int32')
         # self.position_2_ids = tf.keras.layers.Input(shape=(self.max_length,), dtype='int32')
@@ -72,7 +72,7 @@ class BertgMLPModel:
         #     self.position_2_ids)
         # position_emb = tf.concat([positions_1_emb, positions_2_emb], axis=-1)
 
-        relation_emb = tf.keras.layers.Embedding(self.num_of_depend + 1, 18)(self.relation_ids)
+        relation_emb = tf.keras.layers.Embedding(self.num_of_depend + 1, 16)(self.relation_ids)
 
         word_x = gMLP(dim=constants.INPUT_W2V_DIM, depth=self.depth, seq_len=self.max_length,
                       activation=tf.nn.swish)(emb)
@@ -81,7 +81,7 @@ class BertgMLPModel:
         triple_x = gMLP(dim=constants.TRIPLE_W2V_DIM, depth=self.depth, seq_len=2, activation=tf.nn.swish)(triple_emb)
         # position_x = gMLP(dim=50, depth=self.depth, seq_len=self.max_length, activation=tf.nn.swish)(
         #     position_emb)
-        relation_x = gMLP(dim=18, depth=self.depth, seq_len=24, activation=tf.nn.swish)(relation_emb)
+        relation_x = gMLP(dim=16, depth=self.depth, seq_len=18, activation=tf.nn.swish)(relation_emb)
 
         # word_x = gMLPLayer(dropout_rate=0.05)(emb)
         # for _ in range(self.depth - 1):
@@ -124,7 +124,7 @@ class BertgMLPModel:
         relation_x = tf.keras.layers.Flatten(data_format="channels_first")(relation_x)
         relation_x = tf.keras.layers.LayerNormalization()(relation_x)
         # pos_x = tf.keras.layers.Dropout(constants.DROPOUT)(pos_x)
-        relation_x = tf.keras.layers.Dense(6)(relation_x)
+        relation_x = tf.keras.layers.Dense(16)(relation_x)
 
         triple_x = tf.keras.layers.Flatten(data_format="channels_first")(triple_x)
         triple_x = tf.keras.layers.LayerNormalization()(triple_x)

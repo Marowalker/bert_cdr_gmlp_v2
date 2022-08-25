@@ -232,7 +232,6 @@ class Dataset:
         del self.vocab_rels
 
     def _process_data(self):
-        print("Processing dataset:", self.data_name)
         with open(self.data_name, 'r') as f:
             raw_data = f.readlines()
         with open(self.sdp_name, 'r') as f1:
@@ -330,7 +329,6 @@ class Dataset:
 
         for i in range(len(data_relations)):
             rs = []
-            print("Processing sdp relation number: ", i)
             for r in data_relations[i]:
                 if r in self.vocab_rels:
                     r_id = self.vocab_rels[r]
@@ -384,7 +382,7 @@ class Dataset:
         self.words = tf.constant(pad_sequences(word_shuffled, maxlen=constants.MAX_LENGTH, padding='post'))
         self.poses = tf.constant(pad_sequences(pos_shuffled, maxlen=constants.MAX_LENGTH, padding='post'))
         self.synsets = tf.constant(pad_sequences(synset_shuffled, maxlen=constants.MAX_LENGTH, padding='post'))
-        self.relations = tf.constant(pad_sequences(relation_shuffled, maxlen=24, padding='post'))
+        self.relations = tf.constant(pad_sequences(relation_shuffled, maxlen=18, padding='post'))
         self.labels = tf.keras.utils.to_categorical(label_shuffled)
         # self.labels = tf.constant(label_shuffled, dtype='float32')
         # self.positions_1 = tf.constant(pad_sequences(positions_1_shuffle, maxlen=constants.MAX_LENGTH, padding='post'))
