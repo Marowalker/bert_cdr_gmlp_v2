@@ -45,7 +45,7 @@ ALL_WORDS = DATA + 'vocab_lower.txt'
 ALL_POSES = DATA + 'all_pos.txt'
 ALL_SYNSETS = DATA + 'all_hypernyms.txt'
 # ALL_SYNSETS = DATA + 'all_synsets.txt'
-ALL_DEPENDS = DATA + 'all_depend.txt'
+ALL_DEPENDS = DATA + 'all_depend_edge.txt'
 # ALL_DEPENDS = DATA + 'no_dir_depend.txt'
 
 encoder = TFBertModel.from_pretrained("dmis-lab/biobert-v1.1", from_pt=True)

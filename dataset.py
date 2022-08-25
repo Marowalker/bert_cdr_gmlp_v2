@@ -4,6 +4,8 @@ import constants
 from sklearn.utils import shuffle
 import tensorflow as tf
 from tensorflow.keras.preprocessing.sequence import pad_sequences
+from collections import defaultdict
+from tensorflow.keras.preprocessing.text import Tokenizer
 
 np.random.seed(13)
 
@@ -182,7 +184,10 @@ def parse_words(raw_data):
                                 else:
                                     w = word.split('\\')[0]
                         else:
-                            rel = node[0]
+                            rel = node[0].strip()
+                            start = nodes[idx - 1].split('_')[0].strip()
+                            end = nodes[idx + 1].split('_')[0].strip()
+                            rel = start + ' ' + rel + ' ' + end
                             # print(node)
                             # words.append(rel)
                             relations.append(rel)
@@ -227,6 +232,7 @@ class Dataset:
         del self.vocab_rels
 
     def _process_data(self):
+        print("Processing dataset:", self.data_name)
         with open(self.data_name, 'r') as f:
             raw_data = f.readlines()
         with open(self.sdp_name, 'r') as f1:
@@ -324,6 +330,7 @@ class Dataset:
 
         for i in range(len(data_relations)):
             rs = []
+            print("Processing sdp relation number: ", i)
             for r in data_relations[i]:
                 if r in self.vocab_rels:
                     r_id = self.vocab_rels[r]
