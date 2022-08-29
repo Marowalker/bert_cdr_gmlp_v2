@@ -37,8 +37,8 @@ RAW_DATA = DATA + 'raw_data/'
 PICKLE_DATA = DATA + 'pickle/'
 W2V_DATA = DATA + 'w2v_model/'
 
-EMBEDDING_CHEM = W2V_DATA + 'transh_chemical_embeddings200.pkl'
-EMBEDDING_DIS = W2V_DATA + 'transh_disease_embeddings200.pkl'
+EMBEDDING_CHEM = W2V_DATA + 'transh_chemical_embeddings_200.pkl'
+EMBEDDING_DIS = W2V_DATA + 'transh_disease_embeddings_200.pkl'
 
 # ALL_WORDS = DATA + 'vocab.txt'
 ALL_WORDS = DATA + 'vocab_lower.txt'
