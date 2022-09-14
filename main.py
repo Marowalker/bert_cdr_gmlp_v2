@@ -12,6 +12,7 @@ def main():
 
     if constants.IS_REBUILD == 1:
         print('Build data')
+        vocab_words = load_vocab(constants.ALL_WORDS)
         vocab_poses = load_vocab(constants.ALL_POSES)
         vocab_synsets = load_vocab(constants.ALL_SYNSETS)
         vocab_rels = load_vocab(constants.ALL_DEPENDS)
@@ -20,18 +21,21 @@ def main():
 
         train = Dataset(constants.RAW_DATA + 'sentence_data_acentors.train.txt',
                         constants.RAW_DATA + 'sdp_data_acentors_bert.train.txt',
+                        vocab_words=vocab_words,
                         vocab_poses=vocab_poses,
                         vocab_synset=vocab_synsets, vocab_rels=vocab_rels, vocab_chems=chem_vocab, vocab_dis=dis_vocab)
         pickle.dump(train, open(constants.PICKLE_DATA + 'train.pickle', 'wb'), pickle.HIGHEST_PROTOCOL)
 
         dev = Dataset(constants.RAW_DATA + 'sentence_data_acentors.dev.txt',
                       constants.RAW_DATA + 'sdp_data_acentors_bert.dev.txt',
+                      vocab_words=vocab_words,
                       vocab_poses=vocab_poses,
                       vocab_synset=vocab_synsets, vocab_rels=vocab_rels, vocab_chems=chem_vocab, vocab_dis=dis_vocab)
         pickle.dump(dev, open(constants.PICKLE_DATA + 'dev.pickle', 'wb'), pickle.HIGHEST_PROTOCOL)
 
         test = Dataset(constants.RAW_DATA + 'sentence_data_acentors.test.txt',
                        constants.RAW_DATA + 'sdp_data_acentors_bert.test.txt',
+                       vocab_words=vocab_words,
                        vocab_poses=vocab_poses,
                        vocab_synset=vocab_synsets, vocab_rels=vocab_rels, vocab_chems=chem_vocab, vocab_dis=dis_vocab)
         pickle.dump(test, open(constants.PICKLE_DATA + 'test.pickle', 'wb'), pickle.HIGHEST_PROTOCOL)
@@ -73,8 +77,16 @@ def main():
         dis_emb = pickle.load(f)
         f.close()
 
+    with open('data/w2v_model/transe_cdr_word_200.pkl', 'rb') as f:
+        word_emb = pickle.load(f)
+        f.close()
+
+    with open('data/w2v_model/transe_cdr_relation_200.pkl', 'rb') as f:
+        rel_emb = pickle.load(f)
+        f.close()
+
     model = BertgMLPModel(base_encoder=constants.encoder, depth=6, chem_emb=chem_emb, dis_emb=dis_emb,
-                          wordnet_emb=wn_emb)
+                          wordnet_emb=wn_emb, cdr_emb=word_emb, rel_emb=rel_emb)
     model.build(train, validation)
     # model = BERTgMLPModel(model_name=constants.MODEL_NAMES.format('gmlp', constants.JOB_IDENTITY),
     #                       base_encoder=constants.encoder,

@@ -26,7 +26,7 @@ def f1_macro(y_true, y_pred):
 
 
 class BertgMLPModel:
-    def __init__(self, base_encoder, depth, chem_emb, dis_emb, wordnet_emb):
+    def __init__(self, base_encoder, depth, chem_emb, dis_emb, wordnet_emb, cdr_emb, rel_emb):
         if not os.path.exists(TRAINED_MODELS):
             os.makedirs(TRAINED_MODELS)
 
@@ -34,8 +34,10 @@ class BertgMLPModel:
         self.depth = depth
         self.triple_emb = tf.concat([chem_emb, dis_emb], axis=0)
         self.wordnet_emb = wordnet_emb
+        self.cdr_emb = tf.concat([cdr_emb, rel_emb], axis=0)
 
         self.max_length = constants.MAX_LENGTH
+        self.num_of_words = countVocab()
         self.num_of_pos = countNumPos()
         self.num_of_synset = countNumSynset()
         self.num_of_depend = countNumRelation()
@@ -49,7 +51,7 @@ class BertgMLPModel:
         self.e2_mask = tf.keras.layers.Input(shape=(self.max_length,), dtype='float32')
         self.pos_ids = tf.keras.layers.Input(shape=(self.max_length,), dtype='int32')
         self.synset_ids = tf.keras.layers.Input(shape=(self.max_length,), dtype='int32')
-        self.relation_ids = tf.keras.layers.Input(shape=(18,), dtype='int32')
+        self.relation_ids = tf.keras.layers.Input(shape=(36,), dtype='int32')
         self.triple_ids = tf.keras.layers.Input(shape=(2,), dtype='int32')
         # self.position_1_ids = tf.keras.layers.Input(shape=(self.max_length,), dtype='int32')
         # self.position_2_ids = tf.keras.layers.Input(shape=(self.max_length,), dtype='int32')
@@ -72,7 +74,8 @@ class BertgMLPModel:
         #     self.position_2_ids)
         # position_emb = tf.concat([positions_1_emb, positions_2_emb], axis=-1)
 
-        relation_emb = tf.keras.layers.Embedding(self.num_of_depend + 1, 16)(self.relation_ids)
+        relation_emb = tf.keras.layers.Embedding(self.num_of_words + self.num_of_depend + 1, constants.TRIPLE_W2V_DIM,
+                                                 weights=[self.cdr_emb], trainable=False)(self.relation_ids)
 
         word_x = gMLP(dim=constants.INPUT_W2V_DIM, depth=self.depth, seq_len=self.max_length,
                       activation=tf.nn.swish)(emb)
@@ -81,7 +84,8 @@ class BertgMLPModel:
         triple_x = gMLP(dim=constants.TRIPLE_W2V_DIM, depth=self.depth, seq_len=2, activation=tf.nn.swish)(triple_emb)
         # position_x = gMLP(dim=50, depth=self.depth, seq_len=self.max_length, activation=tf.nn.swish)(
         #     position_emb)
-        relation_x = gMLP(dim=16, depth=self.depth, seq_len=18, activation=tf.nn.swish)(relation_emb)
+        relation_x = gMLP(dim=constants.TRIPLE_W2V_DIM, depth=self.depth, seq_len=36, activation=tf.nn.swish)(
+            relation_emb)
 
         # word_x = gMLPLayer(dropout_rate=0.05)(emb)
         # for _ in range(self.depth - 1):

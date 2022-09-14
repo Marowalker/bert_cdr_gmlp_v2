@@ -85,8 +85,8 @@ def load_most_freq_entities():
 
 
 def countNumRelation():
-    with open('./data/all_depend.txt', 'r') as f:
-    # with open('./data/no_dir_depend.txt', 'r') as f:
+    # with open('./data/all_depend.txt', 'r') as f:
+    with open('./data/no_dir_depend.txt', 'r') as f:
         count = 0
         for line in f:
             count += 1
@@ -126,7 +126,7 @@ def countNumTree():
 
 
 def countVocab():
-    with open('./data/vocab_lower.txt', 'r') as f:
+    with open('./data/all_words.txt', 'r') as f:
         count = 0
         for line in f:
             count += 1

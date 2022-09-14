@@ -41,22 +41,22 @@ EMBEDDING_CHEM = W2V_DATA + 'transh_chemical_embeddings_200.pkl'
 EMBEDDING_DIS = W2V_DATA + 'transh_disease_embeddings_200.pkl'
 
 # ALL_WORDS = DATA + 'vocab.txt'
-ALL_WORDS = DATA + 'vocab_lower.txt'
+ALL_WORDS = DATA + 'all_words.txt'
 ALL_POSES = DATA + 'all_pos.txt'
 ALL_SYNSETS = DATA + 'all_hypernyms.txt'
 # ALL_SYNSETS = DATA + 'all_synsets.txt'
-ALL_DEPENDS = DATA + 'all_depend.txt'
-# ALL_DEPENDS = DATA + 'no_dir_depend.txt'
+# ALL_DEPENDS = DATA + 'all_depend.txt'
+ALL_DEPENDS = DATA + 'no_dir_depend.txt'
 
 encoder = TFBertModel.from_pretrained("dmis-lab/biobert-v1.1", from_pt=True)
 tokenizer = BertTokenizer.from_pretrained("dmis-lab/biobert-v1.1")
 
 ADDITIONAL_SPECIAL_TOKENS = ["<e1>", "</e1>", "<e2>", "</e2>"]
-vocab_depend = load_vocab(ALL_DEPENDS)
-
-for d in vocab_depend:
-    if d != '':
-        ADDITIONAL_SPECIAL_TOKENS.append(d.strip())
+# vocab_depend = load_vocab(ALL_DEPENDS)
+#
+# for d in vocab_depend:
+#     if d != '':
+#         ADDITIONAL_SPECIAL_TOKENS.append(d.strip())
 
 # print(ADDITIONAL_SPECIAL_TOKENS)
 
