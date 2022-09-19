@@ -74,7 +74,7 @@ class BertgMLPModel:
         #     self.position_2_ids)
         # position_emb = tf.concat([positions_1_emb, positions_2_emb], axis=-1)
 
-        relation_emb = tf.keras.layers.Embedding(self.num_of_words + self.num_of_depend + 1, constants.TRIPLE_W2V_DIM,
+        relation_emb = tf.keras.layers.Embedding(self.num_of_words + self.num_of_depend + 1, 16,
                                                  weights=[self.cdr_emb], trainable=False)(self.relation_ids)
 
         word_x = gMLP(dim=constants.INPUT_W2V_DIM, depth=self.depth, seq_len=self.max_length,
@@ -84,7 +84,7 @@ class BertgMLPModel:
         triple_x = gMLP(dim=constants.TRIPLE_W2V_DIM, depth=self.depth, seq_len=2, activation=tf.nn.swish)(triple_emb)
         # position_x = gMLP(dim=50, depth=self.depth, seq_len=self.max_length, activation=tf.nn.swish)(
         #     position_emb)
-        relation_x = gMLP(dim=constants.TRIPLE_W2V_DIM, depth=self.depth, seq_len=36, activation=tf.nn.swish)(
+        relation_x = gMLP(dim=16, depth=self.depth, seq_len=36, activation=tf.nn.swish)(
             relation_emb)
 
         # word_x = gMLPLayer(dropout_rate=0.05)(emb)
