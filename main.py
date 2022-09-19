@@ -77,11 +77,11 @@ def main():
         dis_emb = pickle.load(f)
         f.close()
 
-    with open('data/w2v_model/transe_cdr_word_200.pkl', 'rb') as f:
+    with open('data/w2v_model/transe_cdr_word_16.pkl', 'rb') as f:
         word_emb = pickle.load(f)
         f.close()
 
-    with open('data/w2v_model/transe_cdr_relation_200.pkl', 'rb') as f:
+    with open('data/w2v_model/transe_cdr_relation_16.pkl', 'rb') as f:
         rel_emb = pickle.load(f)
         f.close()
 
