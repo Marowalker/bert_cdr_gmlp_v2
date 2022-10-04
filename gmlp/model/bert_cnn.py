@@ -21,13 +21,12 @@ def f1_macro(y_true, y_pred):
     return K.mean(f1)
 
 
-class BertgMLPModel:
-    def __init__(self, base_encoder, depth, chem_emb, dis_emb, wordnet_emb, cdr_emb, rel_emb):
+class BertCNNModel:
+    def __init__(self, base_encoder, chem_emb, dis_emb, wordnet_emb, cdr_emb, rel_emb):
         if not os.path.exists(TRAINED_MODELS):
             os.makedirs(TRAINED_MODELS)
 
         self.encoder = base_encoder
-        self.depth = depth
         self.triple_emb = tf.concat([chem_emb, dis_emb], axis=0)
         self.wordnet_emb = wordnet_emb
         self.cdr_emb = tf.concat([cdr_emb, rel_emb], axis=0)

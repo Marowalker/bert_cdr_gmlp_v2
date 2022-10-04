@@ -5,11 +5,13 @@ import pickle
 import tensorflow as tf
 from evaluate.bc5 import evaluate_bc5
 from gmlp.model.bert_gmlp import BertgMLPModel
+from gmlp.model.bert_cnn import BertCNNModel
+
+
 # from gmlp.model.bert_gmlp_compat import BERTgMLPModel
 
 
 def main():
-
     if constants.IS_REBUILD == 1:
         print('Build data')
         vocab_words = load_vocab(constants.ALL_WORDS)
@@ -85,19 +87,11 @@ def main():
         rel_emb = pickle.load(f)
         f.close()
 
-    model = BertgMLPModel(base_encoder=constants.encoder, depth=6, chem_emb=chem_emb, dis_emb=dis_emb,
-                          wordnet_emb=wn_emb, cdr_emb=word_emb, rel_emb=rel_emb)
+    # model = BertgMLPModel(base_encoder=constants.encoder, depth=6, chem_emb=chem_emb, dis_emb=dis_emb,
+    #                       wordnet_emb=wn_emb, cdr_emb=word_emb, rel_emb=rel_emb)
+    model = BertCNNModel(base_encoder=constants.encoder, chem_emb=chem_emb, dis_emb=dis_emb,
+                         wordnet_emb=wn_emb, cdr_emb=word_emb, rel_emb=rel_emb)
     model.build(train, validation)
-    # model = BERTgMLPModel(model_name=constants.MODEL_NAMES.format('gmlp', constants.JOB_IDENTITY),
-    #                       base_encoder=constants.encoder,
-    #                       depth=5,
-    #                       chem_emb=chem_emb,
-    #                       dis_emb=dis_emb,
-    #                       wordnet_emb=wn_emb)
-    # model.build()
-    #
-    # model.load_data(train=train, validation=validation)
-    # model.run_train(epochs=constants.EPOCHS, early_stopping=constants.EARLY_STOPPING, patience=constants.PATIENCE)
 
     y_pred = model.predict(test)
     answer = {}
@@ -118,4 +112,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
