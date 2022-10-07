@@ -59,8 +59,10 @@ ALL_SYNSETS = DATA + 'all_hypernyms.txt'
 # ALL_DEPENDS = DATA + 'all_depend.txt'
 ALL_DEPENDS = DATA + 'no_dir_depend.txt'
 
-encoder = TFBertModel.from_pretrained("dmis-lab/biobert-v1.1", from_pt=True)
-tokenizer = BertTokenizer.from_pretrained("dmis-lab/biobert-v1.1")
+# encoder = TFBertModel.from_pretrained("dmis-lab/biobert-v1.1", from_pt=True)
+# tokenizer = BertTokenizer.from_pretrained("dmis-lab/biobert-v1.1")
+encoder = TFBertModel.from_pretrained("microsoft/BiomedNLP-PubMedBERT-base-uncased-abstract-fulltext", from_pt=True)
+tokenizer = BertTokenizer.from_pretrained("microsoft/BiomedNLP-PubMedBERT-base-uncased-abstract-fulltext")
 
 ADDITIONAL_SPECIAL_TOKENS = ["<e1>", "</e1>", "<e2>", "</e2>"]
 # vocab_depend = load_vocab(ALL_DEPENDS)
