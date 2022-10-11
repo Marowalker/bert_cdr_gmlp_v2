@@ -69,7 +69,7 @@ train.get_padded_data()
 validation.get_padded_data()
 
 # print(train.relations)
-# print(train.words)
+print(train.words)
 
 # wn_emb = get_trimmed_w2v_vectors('data/w2v_model/wordnet_embeddings.npz')
 #
