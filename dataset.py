@@ -286,6 +286,8 @@ class Dataset:
             pos = [e1_ids, e1_ide, e2_ids, e2_ide]
             all_ents.append(pos)
 
+        # print(max([len(w) for w in words]))
+
         for t in all_ents:
             m0 = []
             for i in range(constants.MAX_LENGTH):
