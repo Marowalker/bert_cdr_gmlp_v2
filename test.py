@@ -4,6 +4,8 @@ from data_utils import make_triple_vocab, load_vocab, get_trimmed_w2v_vectors
 import pickle
 import tensorflow as tf
 from collections import defaultdict
+from sklearn.model_selection import train_test_split
+import pandas as pd
 
 vocab_poses = load_vocab(constants.ALL_POSES)
 vocab_synsets = load_vocab(constants.ALL_SYNSETS)
@@ -18,8 +20,8 @@ vocab_words = load_vocab(constants.ALL_WORDS)
 #         lines = f.readlines()
 #         words, poses, synsets, labels, identities, triples, positions = parse_words(lines)
 #         print(max([len(r) for r in words]))
-        # for rel in relations:
-        #     all_rels.extend(rel)
+# for rel in relations:
+#     all_rels.extend(rel)
 #
 # all_rels = list(set(all_rels))
 # with open(constants.ALL_DEPENDS, 'w') as f1:
@@ -33,43 +35,58 @@ vocab_words = load_vocab(constants.ALL_WORDS)
 chem_vocab = make_triple_vocab(constants.DATA + 'chemical2id.txt')
 dis_vocab = make_triple_vocab(constants.DATA + 'disease2id.txt')
 
-train = Dataset(constants.RAW_DATA + 'sentence_data_acentors.train.txt',
-                constants.RAW_DATA + 'sdp_data_acentors_bert.train.txt',
-                vocab_words=vocab_words,
-                vocab_poses=vocab_poses,
-                vocab_synset=vocab_synsets, vocab_rels=vocab_rels, vocab_chems=chem_vocab, vocab_dis=dis_vocab)
-pickle.dump(train, open(constants.PICKLE_DATA + 'train.pickle', 'wb'), pickle.HIGHEST_PROTOCOL)
+for i in range(1, 10):
+    train = Dataset(constants.DATA + 'experimental/sentence_data_aimed_' + str(i) + '_train.txt',
+                    constants.DATA + 'experimental/sdp_data_aimed_' + str(i) + '_train.txt',
+                    vocab_words=vocab_words,
+                    vocab_poses=vocab_poses,
+                    vocab_synset=vocab_synsets, vocab_rels=vocab_rels, vocab_chems=chem_vocab, vocab_dis=dis_vocab)
 
-dev = Dataset(constants.RAW_DATA + 'sentence_data_acentors.dev.txt',
-              constants.RAW_DATA + 'sdp_data_acentors_bert.dev.txt',
-              vocab_words=vocab_words,
-              vocab_poses=vocab_poses,
-              vocab_synset=vocab_synsets, vocab_rels=vocab_rels, vocab_chems=chem_vocab, vocab_dis=dis_vocab)
-pickle.dump(dev, open(constants.PICKLE_DATA + 'dev.pickle', 'wb'), pickle.HIGHEST_PROTOCOL)
+    test = Dataset(constants.DATA + 'experimental/sentence_data_aimed_' + str(i) + '_test.txt',
+                   constants.DATA + 'experimental/sdp_data_aimed_' + str(i) + '_test.txt',
+                   vocab_words=vocab_words,
+                   vocab_poses=vocab_poses,
+                   vocab_synset=vocab_synsets, vocab_rels=vocab_rels, vocab_chems=chem_vocab, vocab_dis=dis_vocab)
 
-test = Dataset(constants.RAW_DATA + 'sentence_data_acentors.test.txt',
-               constants.RAW_DATA + 'sdp_data_acentors_bert.test.txt',
-               vocab_words=vocab_words,
-               vocab_poses=vocab_poses,
-               vocab_synset=vocab_synsets, vocab_rels=vocab_rels, vocab_chems=chem_vocab, vocab_dis=dis_vocab)
-pickle.dump(test, open(constants.PICKLE_DATA + 'test.pickle', 'wb'), pickle.HIGHEST_PROTOCOL)
+    print(train.words)
+    print(test.words)
 
-# Train, Validation Split
-validation = Dataset('', '', process_data=False)
-train_ratio = 0.85
-n_sample = int(len(dev.words) * (2 * train_ratio - 1))
-props = ['words', 'head_mask', 'e1_mask', 'e2_mask', 'relations', 'labels', 'poses', 'synsets', 'identities',
-         'triples']
-
-for prop in props:
-    train.__dict__[prop].extend(dev.__dict__[prop][:n_sample])
-    validation.__dict__[prop] = dev.__dict__[prop][n_sample:]
-
+# train = Dataset(constants.RAW_DATA + 'sentence_data_acentors.train.txt',
+#                 constants.RAW_DATA + 'sdp_data_acentors_bert.train.txt',
+#                 vocab_words=vocab_words,
+#                 vocab_poses=vocab_poses,
+#                 vocab_synset=vocab_synsets, vocab_rels=vocab_rels, vocab_chems=chem_vocab, vocab_dis=dis_vocab)
+# pickle.dump(train, open(constants.PICKLE_DATA + 'train.pickle', 'wb'), pickle.HIGHEST_PROTOCOL)
+#
+# dev = Dataset(constants.RAW_DATA + 'sentence_data_acentors.dev.txt',
+#               constants.RAW_DATA + 'sdp_data_acentors_bert.dev.txt',
+#               vocab_words=vocab_words,
+#               vocab_poses=vocab_poses,
+#               vocab_synset=vocab_synsets, vocab_rels=vocab_rels, vocab_chems=chem_vocab, vocab_dis=dis_vocab)
+# pickle.dump(dev, open(constants.PICKLE_DATA + 'dev.pickle', 'wb'), pickle.HIGHEST_PROTOCOL)
+#
+# test = Dataset(constants.RAW_DATA + 'sentence_data_acentors.test.txt',
+#                constants.RAW_DATA + 'sdp_data_acentors_bert.test.txt',
+#                vocab_words=vocab_words,
+#                vocab_poses=vocab_poses,
+#                vocab_synset=vocab_synsets, vocab_rels=vocab_rels, vocab_chems=chem_vocab, vocab_dis=dis_vocab)
+# pickle.dump(test, open(constants.PICKLE_DATA + 'test.pickle', 'wb'), pickle.HIGHEST_PROTOCOL)
+#
+# # Train, Validation Split
+# validation = Dataset('', '', process_data=False)
+# train_ratio = 0.85
+# n_sample = int(len(dev.words) * (2 * train_ratio - 1))
+# props = ['words', 'head_mask', 'e1_mask', 'e2_mask', 'relations', 'labels', 'poses', 'synsets', 'identities',
+#          'triples']
+#
+# for prop in props:
+#     train.__dict__[prop].extend(dev.__dict__[prop][:n_sample])
+#     validation.__dict__[prop] = dev.__dict__[prop][n_sample:]
+#
 train.get_padded_data()
-validation.get_padded_data()
-
-# print(train.relations)
-print(train.words)
+# validation.get_padded_data()
+#
+print(train.e1_mask)
 
 # wn_emb = get_trimmed_w2v_vectors('data/w2v_model/wordnet_embeddings.npz')
 #

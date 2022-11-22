@@ -2,7 +2,8 @@ import argparse
 from transformers import TFBertModel, BertTokenizer
 from data_utils import load_vocab
 
-ALL_LABELS = ['CID', 'NONE']
+# ALL_LABELS = ['CID', 'NONE']
+ALL_LABELS = ['1', '0']
 
 UNK = '$UNK$'
 

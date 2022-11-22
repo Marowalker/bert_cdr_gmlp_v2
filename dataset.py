@@ -131,7 +131,7 @@ def parse_sent(raw_data):
             else:
                 print(l)
 
-    return all_words, all_poses, all_synsets, all_labels, all_identities, all_triples
+    return all_words, all_poses, all_synsets, all_labels, all_identities  # , all_triples
 
 
 def parse_words(raw_data):
@@ -238,7 +238,9 @@ class Dataset:
             raw_sdp = f1.readlines()
         data_word_relations, data_pos, data_synsets, data_y, self.identities, data_triples, data_positions = \
             parse_words(raw_sdp)
-        data_words, data_pos, data_synsets, data_y, self.identities, data_triples = parse_sent(
+        # data_words, data_pos, data_synsets, data_y, self.identities, data_triples = parse_sent(
+        #     raw_data)
+        data_words, data_pos, data_synsets, data_y, self.identities = parse_sent(
             raw_data)
 
         words = []
@@ -356,7 +358,8 @@ class Dataset:
         self.synsets = synsets
         # self.positions_1 = positions_1
         # self.positions_2 = positions_2
-        self.triples = self.parse_triple(data_triples)
+        # self.triples = self.parse_triple(data_triples)
+        self.triples = np.zeros([len(self.words), 2])
 
     def parse_triple(self, all_triples):
         data_triples = []
