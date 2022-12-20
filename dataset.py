@@ -3,9 +3,9 @@ from nltk.corpus import wordnet as wn
 import constants
 from sklearn.utils import shuffle
 import tensorflow as tf
-from tensorflow.keras.preprocessing.sequence import pad_sequences
+from keras.utils import pad_sequences
 from collections import defaultdict
-from tensorflow.keras.preprocessing.text import Tokenizer
+from keras.preprocessing.text import Tokenizer
 
 np.random.seed(13)
 
@@ -358,8 +358,8 @@ class Dataset:
         self.synsets = synsets
         # self.positions_1 = positions_1
         # self.positions_2 = positions_2
-        # self.triples = self.parse_triple(data_triples)
-        self.triples = np.zeros([len(self.words), 2])
+        self.triples = self.parse_triple(data_triples)
+        # self.triples = np.zeros([len(self.words), 2])
 
     def parse_triple(self, all_triples):
         data_triples = []
@@ -402,11 +402,3 @@ class Dataset:
         self.head_mask = tf.constant(head_shuffle, dtype='float32')
         self.e1_mask = tf.constant(e1_shuffle, dtype='float32')
         self.e2_mask = tf.constant(e2_shuffle, dtype='float32')
-        # self.words, _ = my_pad_sequences(word_shuffled, pad_tok=0, max_sent_length=constants.MAX_LENGTH, dtype='int32')
-        # self.poses, _ = my_pad_sequences(pos_shuffled, pad_tok=0, max_sent_length=constants.MAX_LENGTH, dtype='int32')
-        # self.synsets, _ = my_pad_sequences(synset_shuffled, pad_tok=0, max_sent_length=constants.MAX_LENGTH,
-        #                                    dtype='int32')
-        # self.head_mask, _ = my_pad_sequences(head_shuffle, pad_tok=0, max_sent_length=constants.MAX_LENGTH,
-        #                                      dtype='float32')
-        # self.e1_mask, _ = my_pad_sequences(e1_shuffle, pad_tok=0, max_sent_length=constants.MAX_LENGTH, dtype='float32')
-        # self.e2_mask, _ = my_pad_sequences(e2_shuffle, pad_tok=0, max_sent_length=constants.MAX_LENGTH, dtype='float32')

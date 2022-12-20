@@ -1,9 +1,10 @@
 import argparse
 from transformers import TFBertModel, BertTokenizer
 from data_utils import load_vocab
+import tensorflow as tf
 
-# ALL_LABELS = ['CID', 'NONE']
-ALL_LABELS = ['1', '0']
+ALL_LABELS = ['CID', 'NONE']
+# ALL_LABELS = ['1', '0']
 
 UNK = '$UNK$'
 
@@ -29,7 +30,7 @@ DROPOUT = 0.1
 # INPUT_W2V_DIM = 300
 # INPUT_W2V_DIM = 200
 INPUT_W2V_DIM = 768
-TRIPLE_W2V_DIM = 200
+TRIPLE_W2V_DIM = 50
 
 MAX_LENGTH = opt.len
 
@@ -49,8 +50,8 @@ RAW_DATA = DATA + 'raw_data/'
 PICKLE_DATA = DATA + 'pickle/'
 W2V_DATA = DATA + 'w2v_model/'
 
-EMBEDDING_CHEM = W2V_DATA + 'transh_chemical_embeddings_200.pkl'
-EMBEDDING_DIS = W2V_DATA + 'transh_disease_embeddings_200.pkl'
+EMBEDDING_CHEM = W2V_DATA + 'transe_chemical_embeddings_50.pkl'
+EMBEDDING_DIS = W2V_DATA + 'transe_disease_embeddings_50.pkl'
 
 # ALL_WORDS = DATA + 'vocab.txt'
 ALL_WORDS = DATA + 'all_words.txt'
@@ -62,10 +63,11 @@ ALL_DEPENDS = DATA + 'no_dir_depend.txt'
 
 # encoder = TFBertModel.from_pretrained("dmis-lab/biobert-v1.1", from_pt=True)
 # tokenizer = BertTokenizer.from_pretrained("dmis-lab/biobert-v1.1")
-encoder = TFBertModel.from_pretrained("microsoft/BiomedNLP-PubMedBERT-base-uncased-abstract-fulltext", from_pt=True)
-tokenizer = BertTokenizer.from_pretrained("microsoft/BiomedNLP-PubMedBERT-base-uncased-abstract-fulltext")
+with tf.device("/GPU:0"):
+    encoder = TFBertModel.from_pretrained("microsoft/BiomedNLP-PubMedBERT-base-uncased-abstract-fulltext", from_pt=True)
+    tokenizer = BertTokenizer.from_pretrained("microsoft/BiomedNLP-PubMedBERT-base-uncased-abstract-fulltext")
 
-ADDITIONAL_SPECIAL_TOKENS = ["<e1>", "</e1>", "<e2>", "</e2>"]
+    ADDITIONAL_SPECIAL_TOKENS = ["<e1>", "</e1>", "<e2>", "</e2>"]
 # vocab_depend = load_vocab(ALL_DEPENDS)
 #
 # for d in vocab_depend:
@@ -74,12 +76,12 @@ ADDITIONAL_SPECIAL_TOKENS = ["<e1>", "</e1>", "<e2>", "</e2>"]
 
 # print(ADDITIONAL_SPECIAL_TOKENS)
 
-tokenizer.add_special_tokens({"additional_special_tokens": ADDITIONAL_SPECIAL_TOKENS})
+    tokenizer.add_special_tokens({"additional_special_tokens": ADDITIONAL_SPECIAL_TOKENS})
 
-START_E1 = tokenizer.encode('<e1>')[1]
-END_E1 = tokenizer.encode('</e1>')[1]
-START_E2 = tokenizer.encode('<e2>')[1]
-END_E2 = tokenizer.encode('</e2>')[1]
+    START_E1 = tokenizer.encode('<e1>')[1]
+    END_E1 = tokenizer.encode('</e1>')[1]
+    START_E2 = tokenizer.encode('<e2>')[1]
+    END_E2 = tokenizer.encode('</e2>')[1]
 
 TRAINED_MODELS = DATA + 'trained_models/'
 MODEL_NAMES = TRAINED_MODELS + '{}_{}'

@@ -1,5 +1,5 @@
 import tensorflow as tf
-from tensorflow_addons.metrics import F1Score
+# from tensorflow_addons.metrics import F1Score
 import constants
 from constants import *
 import numpy as np
@@ -74,7 +74,7 @@ class BertgMLPModel:
         #     self.position_2_ids)
         # position_emb = tf.concat([positions_1_emb, positions_2_emb], axis=-1)
 
-        relation_emb = tf.keras.layers.Embedding(self.num_of_words + self.num_of_depend + 2, 16,
+        relation_emb = tf.keras.layers.Embedding(self.num_of_words + self.num_of_depend, 16,
                                                  weights=[self.cdr_emb], trainable=False)(self.relation_ids)
 
         word_x = gMLP(dim=constants.INPUT_W2V_DIM, depth=self.depth, seq_len=self.max_length,
