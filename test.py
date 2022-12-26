@@ -6,6 +6,12 @@ import tensorflow as tf
 from collections import defaultdict
 from sklearn.model_selection import train_test_split
 import pandas as pd
+from transformers import TFAutoModel, AutoTokenizer
+
+
+# with tf.device("/GPU:0"):
+#     encoder = TFAutoModel.from_pretrained("stanford-crfm/pubmedgpt", from_pt=True)
+#     tokenizer = AutoTokenizer.from_pretrained("stanford-crfm/pubmedgpt")
 
 vocab_poses = load_vocab(constants.ALL_POSES)
 vocab_synsets = load_vocab(constants.ALL_SYNSETS)
@@ -83,16 +89,16 @@ for prop in props:
     train.__dict__[prop].extend(dev.__dict__[prop][:n_sample])
     validation.__dict__[prop] = dev.__dict__[prop][n_sample:]
 
-# len_train = max([len(w) for w in train.words])
-# len_val = max([len(w) for w in validation.words])
-# len_test = max([len(w) for w in test.words])
-#
-# print(max([len_train, len_val, len_test]))
+len_train = max([len(w) for w in train.words])
+len_val = max([len(w) for w in validation.words])
+len_test = max([len(w) for w in test.words])
 
-train.get_padded_data()
-validation.get_padded_data()
-#
-print(train.triples)
+print(max([len_train, len_val, len_test]))
+
+# train.get_padded_data()
+# validation.get_padded_data()
+# #
+# print(train.triples)
 
 # wn_emb = get_trimmed_w2v_vectors('data/w2v_model/wordnet_embeddings.npz')
 #

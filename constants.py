@@ -1,5 +1,5 @@
 import argparse
-from transformers import TFBertModel, BertTokenizer
+from transformers import TFBertModel, BertTokenizer, TFAutoModel, AutoTokenizer
 from data_utils import load_vocab
 import tensorflow as tf
 
@@ -14,7 +14,7 @@ parser.add_argument('-rb', help='Rebuild data', type=int, default=1)
 parser.add_argument('-e', help='Number of epochs', type=int, default=20)
 parser.add_argument('-p', help='Patience of early stop (0 for ignore early stop)', type=int, default=5)
 parser.add_argument('-config', help='CNN configurations default \'1:128\'', type=str, default='2:32')
-parser.add_argument('-len', help='Max sentence or document length', type=int, default=255)
+parser.add_argument('-len', help='Max sentence or document length', type=int, default=256)
 
 
 opt = parser.parse_args()
@@ -29,7 +29,7 @@ DROPOUT = 0.1
 
 # INPUT_W2V_DIM = 300
 # INPUT_W2V_DIM = 200
-INPUT_W2V_DIM = 768
+INPUT_W2V_DIM = 2560
 TRIPLE_W2V_DIM = 50
 
 MAX_LENGTH = opt.len
@@ -64,8 +64,11 @@ ALL_DEPENDS = DATA + 'no_dir_depend.txt'
 # encoder = TFBertModel.from_pretrained("dmis-lab/biobert-v1.1", from_pt=True)
 # tokenizer = BertTokenizer.from_pretrained("dmis-lab/biobert-v1.1")
 with tf.device("/GPU:0"):
-    encoder = TFBertModel.from_pretrained("microsoft/BiomedNLP-PubMedBERT-base-uncased-abstract-fulltext", from_pt=True)
-    tokenizer = BertTokenizer.from_pretrained("microsoft/BiomedNLP-PubMedBERT-base-uncased-abstract-fulltext")
+    # encoder = TFBertModel.from_pretrained("microsoft/BiomedNLP-PubMedBERT-base-uncased-abstract-fulltext", from_pt=True)
+    # tokenizer = BertTokenizer.from_pretrained("microsoft/BiomedNLP-PubMedBERT-base-uncased-abstract-fulltext")
+
+    encoder = TFAutoModel.from_pretrained("stanford-crfm/pubmedgpt", from_pt=True)
+    tokenizer = AutoTokenizer.from_pretrained("stanford-crfm/pubmedgpt")
 
     ADDITIONAL_SPECIAL_TOKENS = ["<e1>", "</e1>", "<e2>", "</e2>"]
 # vocab_depend = load_vocab(ALL_DEPENDS)
@@ -78,10 +81,17 @@ with tf.device("/GPU:0"):
 
     tokenizer.add_special_tokens({"additional_special_tokens": ADDITIONAL_SPECIAL_TOKENS})
 
-    START_E1 = tokenizer.encode('<e1>')[1]
-    END_E1 = tokenizer.encode('</e1>')[1]
-    START_E2 = tokenizer.encode('<e2>')[1]
-    END_E2 = tokenizer.encode('</e2>')[1]
+    # for bert models
+    # START_E1 = tokenizer.encode('<e1>')[1]
+    # END_E1 = tokenizer.encode('</e1>')[1]
+    # START_E2 = tokenizer.encode('<e2>')[1]
+    # END_E2 = tokenizer.encode('</e2>')[1]
+
+    # for gpt
+    START_E1 = tokenizer.encode('<e1>')[0]
+    END_E1 = tokenizer.encode('</e1>')[0]
+    START_E2 = tokenizer.encode('<e2>')[0]
+    END_E2 = tokenizer.encode('</e2>')[0]
 
 TRAINED_MODELS = DATA + 'trained_models/'
 MODEL_NAMES = TRAINED_MODELS + '{}_{}'
