@@ -64,11 +64,11 @@ ALL_DEPENDS = DATA + 'no_dir_depend.txt'
 # encoder = TFBertModel.from_pretrained("dmis-lab/biobert-v1.1", from_pt=True)
 # tokenizer = BertTokenizer.from_pretrained("dmis-lab/biobert-v1.1")
 with tf.device("/GPU:0"):
-    # encoder = TFBertModel.from_pretrained("microsoft/BiomedNLP-PubMedBERT-base-uncased-abstract-fulltext", from_pt=True)
-    # tokenizer = BertTokenizer.from_pretrained("microsoft/BiomedNLP-PubMedBERT-base-uncased-abstract-fulltext")
+    encoder = TFBertModel.from_pretrained("microsoft/BiomedNLP-PubMedBERT-base-uncased-abstract-fulltext", from_pt=True)
+    tokenizer = BertTokenizer.from_pretrained("microsoft/BiomedNLP-PubMedBERT-base-uncased-abstract-fulltext")
 
-    encoder = TFAutoModel.from_pretrained("stanford-crfm/pubmedgpt", from_pt=True)
-    tokenizer = AutoTokenizer.from_pretrained("stanford-crfm/pubmedgpt")
+    # encoder = TFAutoModel.from_pretrained("stanford-crfm/pubmedgpt", from_pt=True)
+    # tokenizer = AutoTokenizer.from_pretrained("stanford-crfm/pubmedgpt")
 
     ADDITIONAL_SPECIAL_TOKENS = ["<e1>", "</e1>", "<e2>", "</e2>"]
 # vocab_depend = load_vocab(ALL_DEPENDS)
@@ -82,16 +82,16 @@ with tf.device("/GPU:0"):
     tokenizer.add_special_tokens({"additional_special_tokens": ADDITIONAL_SPECIAL_TOKENS})
 
     # for bert models
-    # START_E1 = tokenizer.encode('<e1>')[1]
-    # END_E1 = tokenizer.encode('</e1>')[1]
-    # START_E2 = tokenizer.encode('<e2>')[1]
-    # END_E2 = tokenizer.encode('</e2>')[1]
+    START_E1 = tokenizer.encode('<e1>')[1]
+    END_E1 = tokenizer.encode('</e1>')[1]
+    START_E2 = tokenizer.encode('<e2>')[1]
+    END_E2 = tokenizer.encode('</e2>')[1]
 
     # for gpt
-    START_E1 = tokenizer.encode('<e1>')[0]
-    END_E1 = tokenizer.encode('</e1>')[0]
-    START_E2 = tokenizer.encode('<e2>')[0]
-    END_E2 = tokenizer.encode('</e2>')[0]
+    # START_E1 = tokenizer.encode('<e1>')[0]
+    # END_E1 = tokenizer.encode('</e1>')[0]
+    # START_E2 = tokenizer.encode('<e2>')[0]
+    # END_E2 = tokenizer.encode('</e2>')[0]
 
 TRAINED_MODELS = DATA + 'trained_models/'
 MODEL_NAMES = TRAINED_MODELS + '{}_{}'
