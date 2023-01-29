@@ -3,8 +3,9 @@ from transformers import TFBertModel, BertTokenizer, TFAutoModel, AutoTokenizer
 from data_utils import load_vocab
 import tensorflow as tf
 
-ALL_LABELS = ['CID', 'NONE']
-# ALL_LABELS = ['1', '0']
+ALL_LABELS_CID = ['CID', 'NONE']
+ALL_LABELS_CHEMPROT = ['CPR:3', 'CPR:4', 'CPR:5', 'CPR:6', 'CPR:9', 'NONE']
+ALL_LABELS_DDI = ['1', '0']
 
 UNK = '$UNK$'
 
@@ -14,7 +15,8 @@ parser.add_argument('-rb', help='Rebuild data', type=int, default=1)
 parser.add_argument('-e', help='Number of epochs', type=int, default=20)
 parser.add_argument('-p', help='Patience of early stop (0 for ignore early stop)', type=int, default=5)
 parser.add_argument('-config', help='CNN configurations default \'1:128\'', type=str, default='2:32')
-parser.add_argument('-len', help='Max sentence or document length', type=int, default=256)
+# default max length: for cid: 256; for chemprot: 318
+parser.add_argument('-len', help='Max sentence or document length', type=int, default=318)
 
 
 opt = parser.parse_args()
@@ -29,7 +31,7 @@ DROPOUT = 0.1
 
 # INPUT_W2V_DIM = 300
 # INPUT_W2V_DIM = 200
-INPUT_W2V_DIM = 2560
+INPUT_W2V_DIM = 768
 TRIPLE_W2V_DIM = 50
 
 MAX_LENGTH = opt.len
@@ -47,6 +49,9 @@ else:
 
 DATA = 'data/'
 RAW_DATA = DATA + 'raw_data/'
+CID_DATA = RAW_DATA + 'cid/'
+CHEMPROT_DATA = RAW_DATA + 'chemprot/'
+DDI_DATA = RAW_DATA + 'ddi/'
 PICKLE_DATA = DATA + 'pickle/'
 W2V_DATA = DATA + 'w2v_model/'
 

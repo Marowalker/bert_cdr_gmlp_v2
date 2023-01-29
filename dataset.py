@@ -207,7 +207,7 @@ class Dataset:
     def __init__(self, data_name, sdp_name, vocab_words=None, vocab_poses=None, vocab_synset=None, vocab_rels=None,
                  vocab_chems=None,
                  vocab_dis=None,
-                 process_data=True):
+                 process_data='cid'):
         self.data_name = data_name
         self.sdp_name = sdp_name
 
@@ -220,7 +220,7 @@ class Dataset:
         self.vocab_dis = vocab_dis
 
         if process_data:
-            self._process_data()
+            self._process_data(process_data)
             self._clean_data()
 
     def get_padded_data(self, shuffled=True):
@@ -231,10 +231,10 @@ class Dataset:
         del self.vocab_synsets
         del self.vocab_rels
 
-    def _process_data(self):
-        with open(self.data_name, 'r') as f:
+    def _process_data(self, process_data):
+        with open(self.data_name, 'r', encoding='utf-8') as f:
             raw_data = f.readlines()
-        with open(self.sdp_name, 'r') as f1:
+        with open(self.sdp_name, 'r', encoding='utf-8') as f1:
             raw_sdp = f1.readlines()
         data_word_relations, data_pos, data_synsets, data_y, self.identities, data_triples, data_positions = \
             parse_words(raw_sdp)
@@ -328,7 +328,12 @@ class Dataset:
             poses.append(ps)
             synsets.append(ss)
 
-            lb = constants.ALL_LABELS.index(data_y[i][0])
+            if process_data == 'CID':
+                lb = constants.ALL_LABELS_CID.index(data_y[i][0])
+            elif process_data == 'DDI':
+                lb = constants.ALL_LABELS_DDI.index(data_y[i][0])
+            else:
+                lb = constants.ALL_LABELS_CHEMPROT.index(data_y[i][0])
             labels.append(lb)
 
         for i in range(len(data_word_relations)):
@@ -364,8 +369,15 @@ class Dataset:
     def parse_triple(self, all_triples):
         data_triples = []
         for c, d in all_triples:
-            c_id = int(self.vocab_chems[c])
-            d_id = int(self.vocab_dis[d]) + int(len(self.vocab_chems))
+            if c in self.vocab_chems and d in self.vocab_dis:
+                c_id = int(self.vocab_chems[c])
+                d_id = int(self.vocab_dis[d]) + int(len(self.vocab_chems))
+            elif c in self.vocab_chems:
+                c_id = int(self.vocab_chems[c])
+                d_id = int(len(self.vocab_dis)) + int(len(self.vocab_chems))
+            else:
+                c_id = int(len(self.vocab_chems))
+                d_id = int(len(self.vocab_dis)) + int(len(self.vocab_chems))
             data_triples.append([c_id, d_id])
 
         return data_triples

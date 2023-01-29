@@ -25,21 +25,24 @@ def main():
                         constants.RAW_DATA + 'sdp_data_acentors_bert.train.txt',
                         vocab_words=vocab_words,
                         vocab_poses=vocab_poses,
-                        vocab_synset=vocab_synsets, vocab_rels=vocab_rels, vocab_chems=chem_vocab, vocab_dis=dis_vocab)
+                        vocab_synset=vocab_synsets, vocab_rels=vocab_rels, vocab_chems=chem_vocab, vocab_dis=dis_vocab,
+                        process_data='cid')
         pickle.dump(train, open(constants.PICKLE_DATA + 'train.pickle', 'wb'), pickle.HIGHEST_PROTOCOL)
 
         dev = Dataset(constants.RAW_DATA + 'sentence_data_acentors.dev.txt',
                       constants.RAW_DATA + 'sdp_data_acentors_bert.dev.txt',
                       vocab_words=vocab_words,
                       vocab_poses=vocab_poses,
-                      vocab_synset=vocab_synsets, vocab_rels=vocab_rels, vocab_chems=chem_vocab, vocab_dis=dis_vocab)
+                      vocab_synset=vocab_synsets, vocab_rels=vocab_rels, vocab_chems=chem_vocab, vocab_dis=dis_vocab,
+                      process_data='cid')
         pickle.dump(dev, open(constants.PICKLE_DATA + 'dev.pickle', 'wb'), pickle.HIGHEST_PROTOCOL)
 
         test = Dataset(constants.RAW_DATA + 'sentence_data_acentors.test.txt',
                        constants.RAW_DATA + 'sdp_data_acentors_bert.test.txt',
                        vocab_words=vocab_words,
                        vocab_poses=vocab_poses,
-                       vocab_synset=vocab_synsets, vocab_rels=vocab_rels, vocab_chems=chem_vocab, vocab_dis=dis_vocab)
+                       vocab_synset=vocab_synsets, vocab_rels=vocab_rels, vocab_chems=chem_vocab, vocab_dis=dis_vocab,
+                       process_data='cid')
         pickle.dump(test, open(constants.PICKLE_DATA + 'test.pickle', 'wb'), pickle.HIGHEST_PROTOCOL)
 
     else:
@@ -49,7 +52,7 @@ def main():
         test = pickle.load(open(constants.PICKLE_DATA + 'test.pickle', 'rb'))
 
     # Train, Validation Split
-    validation = Dataset('', '', process_data=False)
+    validation = Dataset('', '', process_data=None)
     train_ratio = 0.85
     n_sample = int(len(dev.words) * (2 * train_ratio - 1))
     props = ['words', 'head_mask', 'e1_mask', 'e2_mask', 'labels', 'poses', 'synsets', 'relations', 'identities',
