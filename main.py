@@ -6,50 +6,113 @@ import tensorflow as tf
 from evaluate.bc5 import evaluate_bc5
 from gmlp.model.bert_gmlp import BertgMLPModel
 from gmlp.model.bert_cnn import BertCNNModel
+from sklearn.metrics import precision_recall_fscore_support, confusion_matrix
 
 
 # from gmlp.model.bert_gmlp_compat import BERTgMLPModel
 
 
-def main():
-    if constants.IS_REBUILD == 1:
-        print('Build data')
-        vocab_words = load_vocab(constants.ALL_WORDS)
-        vocab_poses = load_vocab(constants.ALL_POSES)
-        vocab_synsets = load_vocab(constants.ALL_SYNSETS)
-        vocab_rels = load_vocab(constants.ALL_DEPENDS)
-        chem_vocab = make_triple_vocab(constants.DATA + 'chemical2id.txt')
-        dis_vocab = make_triple_vocab(constants.DATA + 'disease2id.txt')
+def main(mode='cid'):
+    if mode == 'cid':
+        if constants.IS_REBUILD == 1:
+            print('Build data')
+            vocab_words = load_vocab(constants.ALL_WORDS)
+            vocab_poses = load_vocab(constants.ALL_POSES)
+            vocab_synsets = load_vocab(constants.ALL_SYNSETS)
+            vocab_rels = load_vocab(constants.ALL_DEPENDS)
+            chem_vocab = make_triple_vocab(constants.DATA + 'chemical2id.txt')
+            dis_vocab = make_triple_vocab(constants.DATA + 'disease2id.txt')
 
-        train = Dataset(constants.RAW_DATA + 'sentence_data_acentors.train.txt',
-                        constants.RAW_DATA + 'sdp_data_acentors_bert.train.txt',
-                        vocab_words=vocab_words,
-                        vocab_poses=vocab_poses,
-                        vocab_synset=vocab_synsets, vocab_rels=vocab_rels, vocab_chems=chem_vocab, vocab_dis=dis_vocab,
-                        process_data='cid')
-        pickle.dump(train, open(constants.PICKLE_DATA + 'train.pickle', 'wb'), pickle.HIGHEST_PROTOCOL)
+            train = Dataset(constants.RAW_DATA + 'sentence_data_acentors.train.txt',
+                            constants.RAW_DATA + 'sdp_data_acentors_bert.train.txt',
+                            vocab_words=vocab_words,
+                            vocab_poses=vocab_poses,
+                            vocab_synset=vocab_synsets, vocab_rels=vocab_rels, vocab_chems=chem_vocab,
+                            vocab_dis=dis_vocab,
+                            process_data='cid')
+            pickle.dump(train, open(constants.PICKLE_DATA + 'train.pickle', 'wb'), pickle.HIGHEST_PROTOCOL)
 
-        dev = Dataset(constants.RAW_DATA + 'sentence_data_acentors.dev.txt',
-                      constants.RAW_DATA + 'sdp_data_acentors_bert.dev.txt',
-                      vocab_words=vocab_words,
-                      vocab_poses=vocab_poses,
-                      vocab_synset=vocab_synsets, vocab_rels=vocab_rels, vocab_chems=chem_vocab, vocab_dis=dis_vocab,
-                      process_data='cid')
-        pickle.dump(dev, open(constants.PICKLE_DATA + 'dev.pickle', 'wb'), pickle.HIGHEST_PROTOCOL)
+            dev = Dataset(constants.RAW_DATA + 'sentence_data_acentors.dev.txt',
+                          constants.RAW_DATA + 'sdp_data_acentors_bert.dev.txt',
+                          vocab_words=vocab_words,
+                          vocab_poses=vocab_poses,
+                          vocab_synset=vocab_synsets, vocab_rels=vocab_rels, vocab_chems=chem_vocab,
+                          vocab_dis=dis_vocab,
+                          process_data='cid')
+            pickle.dump(dev, open(constants.PICKLE_DATA + 'dev.pickle', 'wb'), pickle.HIGHEST_PROTOCOL)
 
-        test = Dataset(constants.RAW_DATA + 'sentence_data_acentors.test.txt',
-                       constants.RAW_DATA + 'sdp_data_acentors_bert.test.txt',
-                       vocab_words=vocab_words,
-                       vocab_poses=vocab_poses,
-                       vocab_synset=vocab_synsets, vocab_rels=vocab_rels, vocab_chems=chem_vocab, vocab_dis=dis_vocab,
-                       process_data='cid')
-        pickle.dump(test, open(constants.PICKLE_DATA + 'test.pickle', 'wb'), pickle.HIGHEST_PROTOCOL)
+            test = Dataset(constants.RAW_DATA + 'sentence_data_acentors.test.txt',
+                           constants.RAW_DATA + 'sdp_data_acentors_bert.test.txt',
+                           vocab_words=vocab_words,
+                           vocab_poses=vocab_poses,
+                           vocab_synset=vocab_synsets, vocab_rels=vocab_rels, vocab_chems=chem_vocab,
+                           vocab_dis=dis_vocab,
+                           process_data='cid')
+            pickle.dump(test, open(constants.PICKLE_DATA + 'test.pickle', 'wb'), pickle.HIGHEST_PROTOCOL)
 
+        else:
+            print('Load data')
+            train = pickle.load(open(constants.PICKLE_DATA + 'train.pickle', 'rb'))
+            dev = pickle.load(open(constants.PICKLE_DATA + 'dev.pickle', 'rb'))
+            test = pickle.load(open(constants.PICKLE_DATA + 'test.pickle', 'rb'))
+
+        with open('data/w2v_model/transe_cdr_word_16.pkl', 'rb') as f:
+            word_emb = pickle.load(f)
+            f.close()
+
+        with open('data/w2v_model/transe_cdr_relation_16.pkl', 'rb') as f:
+            rel_emb = pickle.load(f)
+            f.close()
     else:
-        print('Load data')
-        train = pickle.load(open(constants.PICKLE_DATA + 'train.pickle', 'rb'))
-        dev = pickle.load(open(constants.PICKLE_DATA + 'dev.pickle', 'rb'))
-        test = pickle.load(open(constants.PICKLE_DATA + 'test.pickle', 'rb'))
+        if constants.IS_REBUILD == 1:
+            print('Build data')
+            vocab_words = load_vocab(constants.ALL_WORDS)
+            vocab_poses = load_vocab(constants.ALL_POSES)
+            vocab_synsets = load_vocab(constants.ALL_SYNSETS)
+            vocab_rels = load_vocab(constants.ALL_DEPENDS)
+            chem_vocab = make_triple_vocab(constants.DATA + 'chemprot_chemical2id.txt')
+            dis_vocab = make_triple_vocab(constants.DATA + 'chemprot_gene2id.txt')
+
+            train = Dataset(constants.CHEMPROT_DATA + 'sentence_data_acentors.train.txt',
+                            constants.CHEMPROT_DATA + 'sdp_data_acentors.train.txt',
+                            vocab_words=vocab_words,
+                            vocab_poses=vocab_poses,
+                            vocab_synset=vocab_synsets, vocab_rels=vocab_rels, vocab_chems=chem_vocab,
+                            vocab_dis=dis_vocab,
+                            process_data=mode)
+            pickle.dump(train, open(constants.PICKLE_DATA + 'train.pickle', 'wb'), pickle.HIGHEST_PROTOCOL)
+            #
+            dev = Dataset(constants.CHEMPROT_DATA + 'sentence_data_acentors.train.txt',
+                          constants.CHEMPROT_DATA + 'sdp_data_acentors.train.txt',
+                          vocab_words=vocab_words,
+                          vocab_poses=vocab_poses,
+                          vocab_synset=vocab_synsets, vocab_rels=vocab_rels, vocab_chems=chem_vocab,
+                          vocab_dis=dis_vocab,
+                          process_data=mode)
+            pickle.dump(dev, open(constants.PICKLE_DATA + 'dev.pickle', 'wb'), pickle.HIGHEST_PROTOCOL)
+
+            test = Dataset(constants.CHEMPROT_DATA + 'sentence_data_acentors.train.txt',
+                           constants.CHEMPROT_DATA + 'sdp_data_acentors.train.txt',
+                           vocab_words=vocab_words,
+                           vocab_poses=vocab_poses,
+                           vocab_synset=vocab_synsets, vocab_rels=vocab_rels, vocab_chems=chem_vocab,
+                           vocab_dis=dis_vocab,
+                           process_data=mode)
+            pickle.dump(test, open(constants.PICKLE_DATA + 'test.pickle', 'wb'), pickle.HIGHEST_PROTOCOL)
+
+        else:
+            print('Load data')
+            train = pickle.load(open(constants.PICKLE_DATA + 'train.pickle', 'rb'))
+            dev = pickle.load(open(constants.PICKLE_DATA + 'dev.pickle', 'rb'))
+            test = pickle.load(open(constants.PICKLE_DATA + 'test.pickle', 'rb'))
+
+        with open('data/w2v_model/transe_chemprot_word_16.pkl', 'rb') as f:
+            word_emb = pickle.load(f)
+            f.close()
+
+        with open('data/w2v_model/transe_chemprot_relation_16.pkl', 'rb') as f:
+            rel_emb = pickle.load(f)
+            f.close()
 
     # Train, Validation Split
     validation = Dataset('', '', process_data=None)
@@ -82,37 +145,34 @@ def main():
         dis_emb = pickle.load(f)
         f.close()
 
-    with open('data/w2v_model/transe_cdr_word_16.pkl', 'rb') as f:
-        word_emb = pickle.load(f)
-        f.close()
-
-    with open('data/w2v_model/transe_cdr_relation_16.pkl', 'rb') as f:
-        rel_emb = pickle.load(f)
-        f.close()
-
     with tf.device("/GPU:0"):
         model = BertgMLPModel(base_encoder=constants.encoder, depth=6, chem_emb=chem_emb, dis_emb=dis_emb,
-                              wordnet_emb=wn_emb, cdr_emb=word_emb, rel_emb=rel_emb)
+                              wordnet_emb=wn_emb, cdr_emb=word_emb, rel_emb=rel_emb, mode=mode)
         # model = BertCNNModel(base_encoder=constants.encoder, chem_emb=chem_emb, dis_emb=dis_emb,
         #                      wordnet_emb=wn_emb, cdr_emb=word_emb, rel_emb=rel_emb)
         model.build(train, validation)
 
         y_pred = model.predict(test)
-    answer = {}
-    identities = test.identities
+    if mode == 'cid':
+        answer = {}
+        identities = test.identities
 
-    for i in range(len(y_pred)):
-        if y_pred[i] == 0:
-            if identities[i][0] not in answer:
-                answer[identities[i][0]] = []
+        for i in range(len(y_pred)):
+            if y_pred[i] == 0:
+                if identities[i][0] not in answer:
+                    answer[identities[i][0]] = []
 
-            if identities[i][1] not in answer[identities[i][0]]:
-                answer[identities[i][0]].append(identities[i][1])
+                if identities[i][1] not in answer[identities[i][0]]:
+                    answer[identities[i][0]].append(identities[i][1])
 
-    print(
-        'result: abstract: ', evaluate_bc5(answer)
-    )
+        print(
+            'result: abstract: ', evaluate_bc5(answer)
+        )
+    else:
+        p, r, f1, _ = precision_recall_fscore_support(y_true=test.labels, y_pred=y_pred, average='micro')
+        tn, fp, fn, tp = confusion_matrix(test.labels, y_pred).ravel()
+        print('result: abstract: ', p, r, f1, tp, fp, fn)
 
 
 if __name__ == '__main__':
-    main()
+    main(mode='chemprot')

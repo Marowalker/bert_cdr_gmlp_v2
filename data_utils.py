@@ -84,29 +84,49 @@ def load_most_freq_entities():
     return most_frequent_ent
 
 
-def countNumRelation():
-    # with open('./data/all_depend.txt', 'r') as f:
-    with open('./data/no_dir_depend.txt', 'r') as f:
-        count = 0
-        for line in f:
-            count += 1
-        return count
+def countNumRelation(mode='cid'):
+    if mode == 'cid':
+        with open('./data/no_dir_depend.txt', 'r') as f:
+            count = 0
+            for line in f:
+                count += 1
+            return count
+    else:
+        with open('./data/no_dir_depend_chemprot.txt', 'r', encoding='utf-8') as f:
+            count = 0
+            for line in f:
+                count += 1
+            return count
 
 
-def countNumPos():
-    with open('./data/all_pos.txt', 'r') as f:
-        count = 0
-        for line in f:
-            count += 1
-        return count
+def countNumPos(mode='cid'):
+    if mode == 'cid':
+        with open('./data/all_pos.txt', 'r') as f:
+            count = 0
+            for line in f:
+                count += 1
+            return count
+    else:
+        with open('./data/all_pos_chemprot.txt', 'r', encoding='utf-8') as f:
+            count = 0
+            for line in f:
+                count += 1
+            return count
 
 
-def countNumSynset():
-    with open('./data/all_hypernyms.txt', 'r') as f:
-        count = 0
-        for line in f:
-            count += 1
-        return count
+def countNumSynset(mode='cid'):
+    if mode == 'cid':
+        with open('./data/all_hypernyms.txt', 'r') as f:
+            count = 0
+            for line in f:
+                count += 1
+            return count
+    else:
+        with open('./data/all_hypernyms_chemprot.txt', 'r', encoding='utf-8') as f:
+            count = 0
+            for line in f:
+                count += 1
+            return count
 
 
 def countNumChar():
@@ -125,12 +145,19 @@ def countNumTree():
         return count
 
 
-def countVocab():
-    with open('./data/all_words.txt', 'r') as f:
-        count = 0
-        for line in f:
-            count += 1
-        return count
+def countVocab(mode='cid'):
+    if mode == 'cid':
+        with open('./data/all_words.txt', 'r') as f:
+            count = 0
+            for line in f:
+                count += 1
+            return count
+    else:
+        with open('./data/all_words_chemprot.txt', 'r', encoding='utf-8') as f:
+            count = 0
+            for line in f:
+                count += 1
+            return count
 
 
 def make_triple_vocab(infile):
@@ -171,7 +198,8 @@ def gen(values, labels, seq_len):
 
 
 def make_dataset(values, labels, seq_len, batch_size):
-    ds_args = ((tf.int64, tf.int64, tf.int64), (tf.TensorShape([seq_len]), tf.TensorShape([seq_len]), tf.TensorShape([2])))
+    ds_args = (
+    (tf.int64, tf.int64, tf.int64), (tf.TensorShape([seq_len]), tf.TensorShape([seq_len]), tf.TensorShape([2])))
     ds = tf.data.Dataset.from_generator(gen(values, labels, seq_len), *ds_args)
     # ds = ds.shuffle(buffer_size=100000, seed=1234)
     ds = ds.batch(batch_size)
@@ -184,4 +212,3 @@ def mat_mul(hidden_output, e_mask):
     prod = e_mask @ hidden_output
     prod = tf.squeeze(prod, axis=1)
     return prod
-

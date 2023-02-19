@@ -58,13 +58,12 @@ W2V_DATA = DATA + 'w2v_model/'
 EMBEDDING_CHEM = W2V_DATA + 'transe_chemical_embeddings_50.pkl'
 EMBEDDING_DIS = W2V_DATA + 'transe_disease_embeddings_50.pkl'
 
-# ALL_WORDS = DATA + 'vocab.txt'
-ALL_WORDS = DATA + 'all_words.txt'
-ALL_POSES = DATA + 'all_pos.txt'
-ALL_SYNSETS = DATA + 'all_hypernyms.txt'
+ALL_WORDS = DATA + 'all_words_chemprot.txt'
+ALL_POSES = DATA + 'all_pos_chemprot.txt'
+ALL_SYNSETS = DATA + 'all_hypernyms_chemprot.txt'
 # ALL_SYNSETS = DATA + 'all_synsets.txt'
 # ALL_DEPENDS = DATA + 'all_depend.txt'
-ALL_DEPENDS = DATA + 'no_dir_depend.txt'
+ALL_DEPENDS = DATA + 'no_dir_depend_chemprot.txt'
 
 # encoder = TFBertModel.from_pretrained("dmis-lab/biobert-v1.1", from_pt=True)
 # tokenizer = BertTokenizer.from_pretrained("dmis-lab/biobert-v1.1")

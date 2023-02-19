@@ -37,8 +37,8 @@ vocab_words = load_vocab(constants.ALL_WORDS)
 
 # print(words)
 
-chem_vocab = make_triple_vocab(constants.DATA + 'chemical2id.txt')
-dis_vocab = make_triple_vocab(constants.DATA + 'disease2id.txt')
+chem_vocab = make_triple_vocab(constants.DATA + 'chemprot_chemical2id.txt')
+dis_vocab = make_triple_vocab(constants.DATA + 'chemprot_gene2id.txt')
 
 # for i in range(1, 10):
 #     train = Dataset(constants.DATA + 'experimental/sentence_data_aimed_' + str(i) + '_train.txt',
@@ -100,7 +100,7 @@ for prop in props:
 train.get_padded_data()
 validation.get_padded_data()
 #
-print(validation.triples)
+print(test.labels)
 
 # wn_emb = get_trimmed_w2v_vectors('data/w2v_model/wordnet_embeddings.npz')
 #
