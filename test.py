@@ -56,24 +56,24 @@ dis_vocab = make_triple_vocab(constants.DATA + 'chemprot_gene2id.txt')
 #     print(train.words)
 #     print(test.words)
 
-train = Dataset(constants.CHEMPROT_DATA + 'sentence_data_acentors.train.txt',
-                constants.CHEMPROT_DATA + 'sdp_data_acentors.train.txt',
+train = Dataset(constants.CHEMPROT_DATA + 'sentence_data_acentors_no_kb.train.txt',
+                constants.CHEMPROT_DATA + 'sdp_data_acentors_no_kb.train.txt',
                 vocab_words=vocab_words,
                 vocab_poses=vocab_poses,
                 vocab_synset=vocab_synsets, vocab_rels=vocab_rels, vocab_chems=chem_vocab, vocab_dis=dis_vocab,
                 process_data='chemprot')
 # pickle.dump(train, open(constants.PICKLE_DATA + 'train.pickle', 'wb'), pickle.HIGHEST_PROTOCOL)
 #
-dev = Dataset(constants.CHEMPROT_DATA + 'sentence_data_acentors.train.txt',
-              constants.CHEMPROT_DATA + 'sdp_data_acentors.train.txt',
+dev = Dataset(constants.CHEMPROT_DATA + 'sentence_data_acentors_no_kb.dev.txt',
+              constants.CHEMPROT_DATA + 'sdp_data_acentors_no_kb.dev.txt',
               vocab_words=vocab_words,
               vocab_poses=vocab_poses,
               vocab_synset=vocab_synsets, vocab_rels=vocab_rels, vocab_chems=chem_vocab, vocab_dis=dis_vocab,
               process_data='chemprot')
 # pickle.dump(dev, open(constants.PICKLE_DATA + 'dev.pickle', 'wb'), pickle.HIGHEST_PROTOCOL)
 
-test = Dataset(constants.CHEMPROT_DATA + 'sentence_data_acentors.train.txt',
-               constants.CHEMPROT_DATA + 'sdp_data_acentors.train.txt',
+test = Dataset(constants.CHEMPROT_DATA + 'sentence_data_acentors_no_kb.test.txt',
+               constants.CHEMPROT_DATA + 'sdp_data_acentors_no_kb.test.txt',
                vocab_words=vocab_words,
                vocab_poses=vocab_poses,
                vocab_synset=vocab_synsets, vocab_rels=vocab_rels, vocab_chems=chem_vocab, vocab_dis=dis_vocab,
@@ -97,10 +97,10 @@ for prop in props:
 #
 # print(max([len_train, len_val, len_test]))
 
-train.get_padded_data()
-validation.get_padded_data()
-#
-print(test.labels)
+# train.get_padded_data(mode='chemprot')
+# validation.get_padded_data(mode='chemprot')
+# #
+print(train.triples)
 
 # wn_emb = get_trimmed_w2v_vectors('data/w2v_model/wordnet_embeddings.npz')
 #

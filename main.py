@@ -7,6 +7,7 @@ from evaluate.bc5 import evaluate_bc5
 from gmlp.model.bert_gmlp import BertgMLPModel
 from gmlp.model.bert_cnn import BertCNNModel
 from sklearn.metrics import precision_recall_fscore_support, confusion_matrix
+import numpy as np
 
 
 # from gmlp.model.bert_gmlp_compat import BERTgMLPModel
@@ -73,31 +74,31 @@ def main(mode='cid'):
             chem_vocab = make_triple_vocab(constants.DATA + 'chemprot_chemical2id.txt')
             dis_vocab = make_triple_vocab(constants.DATA + 'chemprot_gene2id.txt')
 
-            train = Dataset(constants.CHEMPROT_DATA + 'sentence_data_acentors.train.txt',
-                            constants.CHEMPROT_DATA + 'sdp_data_acentors.train.txt',
+            train = Dataset(constants.CHEMPROT_DATA + 'sentence_data_acentors_no_kb.train.txt',
+                            constants.CHEMPROT_DATA + 'sdp_data_acentors_no_kb.train.txt',
                             vocab_words=vocab_words,
                             vocab_poses=vocab_poses,
                             vocab_synset=vocab_synsets, vocab_rels=vocab_rels, vocab_chems=chem_vocab,
                             vocab_dis=dis_vocab,
-                            process_data=mode)
+                            process_data='chemprot')
             pickle.dump(train, open(constants.PICKLE_DATA + 'train.pickle', 'wb'), pickle.HIGHEST_PROTOCOL)
             #
-            dev = Dataset(constants.CHEMPROT_DATA + 'sentence_data_acentors.train.txt',
-                          constants.CHEMPROT_DATA + 'sdp_data_acentors.train.txt',
+            dev = Dataset(constants.CHEMPROT_DATA + 'sentence_data_acentors_no_kb.dev.txt',
+                          constants.CHEMPROT_DATA + 'sdp_data_acentors_no_kb.dev.txt',
                           vocab_words=vocab_words,
                           vocab_poses=vocab_poses,
                           vocab_synset=vocab_synsets, vocab_rels=vocab_rels, vocab_chems=chem_vocab,
                           vocab_dis=dis_vocab,
-                          process_data=mode)
+                          process_data='chemprot')
             pickle.dump(dev, open(constants.PICKLE_DATA + 'dev.pickle', 'wb'), pickle.HIGHEST_PROTOCOL)
 
-            test = Dataset(constants.CHEMPROT_DATA + 'sentence_data_acentors.train.txt',
-                           constants.CHEMPROT_DATA + 'sdp_data_acentors.train.txt',
+            test = Dataset(constants.CHEMPROT_DATA + 'sentence_data_acentors_no_kb.test.txt',
+                           constants.CHEMPROT_DATA + 'sdp_data_acentors_no_kb.test.txt',
                            vocab_words=vocab_words,
                            vocab_poses=vocab_poses,
                            vocab_synset=vocab_synsets, vocab_rels=vocab_rels, vocab_chems=chem_vocab,
                            vocab_dis=dis_vocab,
-                           process_data=mode)
+                           process_data='chemprot')
             pickle.dump(test, open(constants.PICKLE_DATA + 'test.pickle', 'wb'), pickle.HIGHEST_PROTOCOL)
 
         else:
@@ -127,9 +128,9 @@ def main(mode='cid'):
         train.__dict__[prop].extend(dev.__dict__[prop][:n_sample])
         validation.__dict__[prop] = dev.__dict__[prop][n_sample:]
 
-    train.get_padded_data()
-    validation.get_padded_data()
-    test.get_padded_data(shuffled=False)
+    train.get_padded_data(mode='chemprot')
+    validation.get_padded_data(mode='chemprot')
+    test.get_padded_data(mode='chemprot', shuffled=False)
 
     print("Train shape: ", len(train.words))
     print("Test shape: ", len(test.words))
@@ -153,25 +154,28 @@ def main(mode='cid'):
         model.build(train, validation)
 
         y_pred = model.predict(test)
-    if mode == 'cid':
+
         answer = {}
         identities = test.identities
 
-        for i in range(len(y_pred)):
+    for i in range(len(y_pred)):
+        if mode == 'cid':
             if y_pred[i] == 0:
                 if identities[i][0] not in answer:
                     answer[identities[i][0]] = []
 
                 if identities[i][1] not in answer[identities[i][0]]:
                     answer[identities[i][0]].append(identities[i][1])
+        else:
+            if y_pred[i] != 5:
+                if identities[i][0] not in answer:
+                    answer[identities[i][0]] = []
 
-        print(
-            'result: abstract: ', evaluate_bc5(answer)
-        )
-    else:
-        p, r, f1, _ = precision_recall_fscore_support(y_true=test.labels, y_pred=y_pred, average='micro')
-        tn, fp, fn, tp = confusion_matrix(test.labels, y_pred).ravel()
-        print('result: abstract: ', p, r, f1, tp, fp, fn)
+                if identities[i][1] not in answer[identities[i][0]]:
+                    answer[identities[i][0]].append(identities[i][1])
+    print(
+        'result: abstract: ', evaluate_bc5(answer)
+    )
 
 
 if __name__ == '__main__':

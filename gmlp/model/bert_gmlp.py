@@ -1,5 +1,5 @@
 import tensorflow as tf
-# from tensorflow_addons.metrics import F1Score
+from tensorflow_addons.metrics import F1Score
 import constants
 from constants import *
 import numpy as np
@@ -91,22 +91,6 @@ class BertgMLPModel:
         relation_x = gMLP(dim=16, depth=self.depth, seq_len=36, activation=tf.nn.swish)(
             relation_emb)
 
-        # word_x = gMLPLayer(dropout_rate=0.05)(emb)
-        # for _ in range(self.depth - 1):
-        #     word_x = gMLPLayer(dropout_rate=0.05)(word_x)
-        #
-        # pos_x = gMLPLayer(dropout_rate=0.05)(pos_emb)
-        # for _ in range(self.depth - 1):
-        #     pos_x = gMLPLayer(dropout_rate=0.05)(pos_x)
-        #
-        # synset_x = gMLPLayer(dropout_rate=0.05)(synset_emb)
-        # for _ in range(self.depth - 1):
-        #     synset_x = gMLPLayer(dropout_rate=0.05)(synset_x)
-        #
-        # triple_x = gMLPLayer(dropout_rate=0.05)(triple_emb)
-        # for _ in range(self.depth - 1):
-        #     triple_x = gMLPLayer(dropout_rate=0.05)(triple_x)
-
         head_x = mat_mul(word_x, self.head_mask)
         head_x = tf.keras.layers.Dropout(constants.DROPOUT)(head_x)
         head_x = tf.keras.layers.Dense(constants.INPUT_W2V_DIM)(head_x)
@@ -139,11 +123,6 @@ class BertgMLPModel:
         # triple_x = tf.keras.layers.Dropout(constants.DROPOUT)(triple_x)
         triple_x = tf.keras.layers.Dense(constants.TRIPLE_W2V_DIM)(triple_x)
 
-        # position_x = tf.keras.layers.Flatten(data_format="channels_first")(position_x)
-        # position_x = tf.keras.layers.LayerNormalization()(position_x)
-        # # position_x = tf.keras.layers.Dropout(constants.DROPOUT)(position_x)
-        # position_x = tf.keras.layers.Dense(50)(position_x)
-
         x = tf.keras.layers.concatenate([head_x, e1_x, e2_x, relation_x, pos_x, synset_x, triple_x])
         # x = tf.keras.layers.concatenate([head_x, e1_x, e2_x, pos_x, synset_x, triple_x])
 
@@ -167,7 +146,7 @@ class BertgMLPModel:
             # inputs=[self.input_ids, self.head_mask, self.e1_mask, self.e2_mask, self.pos_ids, self.synset_ids,
             #         self.triple_ids],
             outputs=self._bert_layer())
-        self.optimizer = tf.keras.optimizers.Adam(lr=4e-6)
+        self.optimizer = tf.keras.optimizers.Adam(lr=1e-5)
 
         # self.model.compile(optimizer=self.optimizer, loss='binary_crossentropy', metrics=['accuracy',
         #                                                                                   F1Score(num_classes=2,
@@ -179,8 +158,9 @@ class BertgMLPModel:
                                metrics=['accuracy', self.f1_score])
         else:
             self.model.compile(optimizer=self.optimizer,
-                               loss=tf.keras.losses.SparseCategoricalCrossentropy(),
-                               metrics=['accuracy', self.f1_score])
+                               loss=tf.keras.losses.CategoricalCrossentropy(),
+                               metrics=['accuracy', F1Score(num_classes=len(constants.ALL_LABELS_CHEMPROT),
+                                                            average="weighted")])
         print(self.model.summary())
 
     def _train(self, train_data, val_data):

@@ -6,6 +6,7 @@ import tensorflow as tf
 from keras.utils import pad_sequences
 from collections import defaultdict
 from keras.preprocessing.text import Tokenizer
+import re
 
 np.random.seed(13)
 
@@ -76,7 +77,7 @@ def my_pad_sequences(sequences, pad_tok, max_sent_length, nlevels=1):
     return np.array(sequence_padded), sequence_length
 
 
-def parse_sent(raw_data):
+def parse_sent(raw_data, mode='chemprot'):
     raw_data = clean_lines(raw_data)
     all_words = []
     all_poses = []
@@ -94,8 +95,9 @@ def parse_sent(raw_data):
             pair = l[0]
             label = l[1]
             if label:
-                chem, dis = pair.split('_')
-                all_triples.append([chem, dis])
+                if mode == 'cid':
+                    chem, dis = pair.split('_')
+                    all_triples.append([chem, dis])
 
                 joint_sdp = ' '.join(l[2:])
                 sdps = joint_sdp.split("-PUNC-")
@@ -121,6 +123,13 @@ def parse_sent(raw_data):
                                 synsets.append(s)
                             else:
                                 w = word.split('\\')[0]
+                    sent = ' '.join(words)
+                    re_e1 = re.compile(r'(<e1>)(.*)(<\/e1>)', re.U | re.I)
+                    re_e2 = re.compile(r'(<e2>)(.*)(<\/e2>)', re.U | re.I)
+                    e1 = re.search(re_e1, sent).groups()[1]
+                    e2 = re.search(re_e2, sent).groups()[1]
+                    if mode == 'chemprot':
+                        all_triples.append([e1, e2])
 
                     all_words.append(words)
                     all_poses.append(poses)
@@ -131,7 +140,7 @@ def parse_sent(raw_data):
             else:
                 print(l)
 
-    return all_words, all_poses, all_synsets, all_labels, all_identities  # , all_triples
+    return all_words, all_poses, all_synsets, all_labels, all_identities, all_triples
 
 
 def parse_words(raw_data):
@@ -223,8 +232,8 @@ class Dataset:
             self._process_data(process_data)
             self._clean_data()
 
-    def get_padded_data(self, shuffled=True):
-        self._pad_data(shuffled=shuffled)
+    def get_padded_data(self, mode='cid', shuffled=True):
+        self._pad_data(mode=mode, shuffled=shuffled)
 
     def _clean_data(self):
         del self.vocab_poses
@@ -240,8 +249,8 @@ class Dataset:
             parse_words(raw_sdp)
         # data_words, data_pos, data_synsets, data_y, self.identities, data_triples = parse_sent(
         #     raw_data)
-        data_words, data_pos, data_synsets, data_y, self.identities = parse_sent(
-            raw_data)
+        data_words, data_pos, data_synsets, data_y, self.identities, data_triples = parse_sent(
+            raw_data, mode=process_data)
 
         words = []
         # positions_1 = []
@@ -334,6 +343,7 @@ class Dataset:
                 lb = constants.ALL_LABELS_DDI.index(data_y[i][0])
             else:
                 lb = constants.ALL_LABELS_CHEMPROT.index(data_y[i][0])
+                # lb = np.zeros(len(constants.ALL_LABELS_CHEMPROT))
             labels.append(lb)
 
         for i in range(len(data_word_relations)):
@@ -382,7 +392,7 @@ class Dataset:
 
         return data_triples
 
-    def _pad_data(self, shuffled=True):
+    def _pad_data(self, mode='cid', shuffled=True):
         if shuffled:
             word_shuffled, head_shuffle, e1_shuffle, e2_shuffle, pos_shuffled, synset_shuffled, relation_shuffled, \
             label_shuffled, triple_shuffled = shuffle(
@@ -406,7 +416,11 @@ class Dataset:
         self.poses = tf.constant(pad_sequences(pos_shuffled, maxlen=constants.MAX_LENGTH, padding='post'))
         self.synsets = tf.constant(pad_sequences(synset_shuffled, maxlen=constants.MAX_LENGTH, padding='post'))
         self.relations = tf.constant(pad_sequences(relation_shuffled, maxlen=36, padding='post'))
-        self.labels = tf.keras.utils.to_categorical(label_shuffled)
+        if mode == 'cid':
+            num_classes = len(constants.ALL_LABELS_CID)
+        else:
+            num_classes = len(constants.ALL_LABELS_CHEMPROT)
+        self.labels = tf.keras.utils.to_categorical(label_shuffled, num_classes=num_classes)
         # self.labels = tf.constant(label_shuffled, dtype='float32')
         # self.positions_1 = tf.constant(pad_sequences(positions_1_shuffle, maxlen=constants.MAX_LENGTH, padding='post'))
         # self.positions_2 = tf.constant(pad_sequences(positions_2_shuffle, maxlen=constants.MAX_LENGTH, padding='post'))
