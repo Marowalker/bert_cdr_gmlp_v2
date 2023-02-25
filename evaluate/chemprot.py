@@ -19,7 +19,8 @@ def evaluate_chemprot(eval_data, get_map=False):
                 fn_m[k].remove(i)
             else:
                 fp += 1
-                fp_m[k].append(i)
+                if k in fp_m:
+                    fp_m[k].append(i)
 
     if tp == 0:
         return 0, 0, 0, tp, fp, fn
