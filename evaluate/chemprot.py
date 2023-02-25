@@ -1,7 +1,7 @@
 import pickle
 
 
-def evaluate_bc5(eval_data, get_map=False):
+def evaluate_chemprot(eval_data, get_map=False):
     eval_map = pickle.load(open('./data/evaluate_chemprot.pkl', 'rb'))
 
     fn = sum([len(eval_map[k]) for k in eval_map])

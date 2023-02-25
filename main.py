@@ -4,6 +4,7 @@ from data_utils import make_triple_vocab, load_vocab, get_trimmed_w2v_vectors
 import pickle
 import tensorflow as tf
 from evaluate.bc5 import evaluate_bc5
+from evaluate.chemprot import evaluate_chemprot
 from gmlp.model.bert_gmlp import BertgMLPModel
 from gmlp.model.bert_cnn import BertCNNModel
 from sklearn.metrics import precision_recall_fscore_support, confusion_matrix
@@ -173,9 +174,14 @@ def main(mode='cid'):
 
                 if identities[i][1] not in answer[identities[i][0]]:
                     answer[identities[i][0]].append(identities[i][1])
-    print(
-        'result: abstract: ', evaluate_bc5(answer)
-    )
+    if mode == 'cid:':
+        print(
+            'result: abstract: ', evaluate_bc5(answer)
+        )
+    else:
+        print(
+            'result: abstract: ', evaluate_chemprot(answer)
+        )
 
 
 if __name__ == '__main__':
